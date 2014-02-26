@@ -1,5 +1,3 @@
-<?php
-
 /**
  * Kumbia Enterprise Framework
  *
