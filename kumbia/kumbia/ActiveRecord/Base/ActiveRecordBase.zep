@@ -238,7 +238,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function __construct( {
+	public function __construct() 
+	{
 		if this->_source=='' {
 			this->_source = \Kumbia\EntityManager::getSourceName(get_class(this));
 		}
@@ -260,11 +261,13 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access private
 	 */
-	private function _findModelName( {
+	private function _findModelName() 
+	{
 		if this->_source=='' {
-            this->_source = \Kumbia\Utils\Utils::uncamelize(get_class(this));
-        }
-        if this->_source=='' {
+            		this->_source = \Kumbia\Utils\Utils::uncamelize(get_class(this));
+        	}
+        
+        	if this->_source=='' {
 			this->_source = get_class(this);
 		}
 	}
@@ -552,7 +555,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function clear( {
+	public function clear() 
+	{
 		this->_connect();
 		fields = this->_getAttributes();
 		for field in fields {
@@ -565,7 +569,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function resetMetaData( {
+	public function resetMetaData() 
+	{
 		this->_dumped = false;
 		if this->isDumped()==false {
 			this->dump();
@@ -578,7 +583,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @param	boolean debug
 	 */
-	public function setDebug(debug {
+	public function setDebug(debug) 
+	{
 		this->_debug = debug;
 		if debug==true {
 			this->_connect();
@@ -592,7 +598,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @param	boolean logger
 	 */
-	public function setLogger(logger {
+	public function setLogger(logger) {
 		this->_logger = logger;
 	}
 
@@ -604,7 +610,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 * @return  ActiveRecordBase
 	 */
-	public function setTransaction(\Kumbia\Transaction\Transaction transaction, attach=false {
+	public function setTransaction(\Kumbia\Transaction\Transaction transaction, attach=false) 
+	{
 		if attach {
 			if transaction->isManaged()==true {
 				this->_dependencyPointer = transaction->attachDependency(this->_dependencyPointer, this);
@@ -619,7 +626,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function detachTransaction( {
+	public function detachTransaction() 
+	{
 		this->_db = \Kumbia\Db\DbPool::getConnection();
 	}
 
@@ -630,7 +638,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	boolean shouldConnect
 	 * @return	DbBase
 	 */
-	public function getConnection(shouldConnect=true {
+	public function getConnection(shouldConnect=true) 
+	{
 		if shouldConnect==true {
 			if !this->_db {
 				this->_connect();
@@ -646,7 +655,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string sqlQuery
 	 * @return	\Kumbia\ActiveRecord\ActiveRecordResultset
 	 */
-	public function findAllBySql(sqlQuery {
+	public function findAllBySql(sqlQuery) 
+	{
 		this->_connect();
 		resultSet = this->_db->query(sqlQuery);
 		if this->_db->numRows(resultSet)>0 {
@@ -664,7 +674,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return		ActiveRecordBase
 	 * @deprecated
 	 */
-	public function findBySql(sqlQuery {
+	public function findBySql(sqlQuery) 
+	{
 		this->_connect();
 		this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
 		row = this->_db->fetchOne(sqlQuery);
@@ -682,7 +693,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return	\Kumbia\ActiveRecord\ActiveRecordResultset
 	 */
-	public static function findAll(params='' {
+	public static function findAll(params='') 
+	{
 		activeModel = \Kumbia\EntityManager::getEntityInstance(get_called_class());
 		arguments = func_get_args();
 		return call_user_func_array(array(activeModel, 'find'), arguments);
@@ -694,7 +706,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return	ActiveRecordBase
 	 */
-	public static function findOne(params='' {
+	public static function findOne(params='') 
+	{
 		activeModel = \Kumbia\EntityManager::getEntityInstance(get_called_class());
 		arguments = func_get_args();
 		return call_user_func_array(array(activeModel, 'findFirst'), arguments);
@@ -708,7 +721,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return		DbResource
 	 * @deprecated
 	 */
-	public function sql(sqlQuery {
+	public function sql(sqlQuery) 
+	{
 		this->_connect();
 		return this->_db->query(sqlQuery);
 	}
@@ -720,7 +734,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed params
 	 * @return	ActiveRecordBase
 	 */
-	public function findFirst(params='' {
+	public function findFirst(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -763,7 +778,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed params
 	 * @return	ActiveRecordBase
 	 */
-	public function findLast(params='' {
+	public function findLast(params='') 
+	{
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
 		if !isset params['order'] {
@@ -779,7 +795,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	array params
 	 * @return	string
 	 */
-	private function _createSQLSelect(array params {
+	private function _createSQLSelect(array params) 
+	{
 		select = 'SELECT ';
 		if isset params['columns'] {
 			this->clear();
@@ -852,7 +869,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string select
 	 * @return	boolean|ActiveRecordResulset
 	 */
-	private function _createResultset(select, resultResource {
+	private function _createResultset(select, resultResource) 
+	{
 		if select['return']=='1' {
 			if this->_db->numRows(resultResource)==0 {
 				this->_count = 0;
@@ -882,7 +900,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return 	ActiveRecordResulset
 	 */
-	public function find(params='' {
+	public function find(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -899,7 +918,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordResulset
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function findForUpdate(params='' {
+	public function findForUpdate(params='') 
+	{
 		this->_connect();
 		#if[compile-time]
 		if this->_db->isUnderTransaction()==false {
@@ -922,7 +942,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordResulset
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function findWithSharedLock(params='' {
+	public function findWithSharedLock(params='') 
+	{
 		this->_connect();
 		#if[compile-time]
 		if this->_db->isUnderTransaction()==false {
@@ -939,13 +960,14 @@ implements ActiveRecordResultInterface, EntityInterface
 
 	/**
 	 * Arma una consulta SQL con el parámetro params
-     *
-     * @access	public
-     * @param 	string select
+     	 *
+     	 * @access	public
+     	 * @param 	string select
 	 * @param	string params
 	 * @return	string
 	 */
-	public function convertParamsToSql(select, params='' {
+	public function convertParamsToSql(select, params='') 
+	{
 		if typeof params == "array" {
 			if isset params['conditions'])&&params['conditions'] {
 				select.= ' WHERE '.params["conditions"].' ';
@@ -1007,7 +1029,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	number
 	 * @return	string
 	 */
-	private function _limit(sqlStatement, number = 1 {
+	private function _limit(sqlStatement, number = 1) 
+	{
 		return this->_db->limit(sqlStatement, number);
 	}
 
@@ -1020,9 +1043,10 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordBase
 	 * @static
 	 */
-	static public function getInstance(entityName, array conditions, array findOptions=array( {
+	static public function getInstance(entityName, array conditions, array findOptions=array()) 
+	{
 		criteria = array();
-		foreach(conditions as field => value {
+		for field,value in conditions {
 			if is_integer(value)||is_double(value {
 				criteria[] = field.' = '.value;
 			} else {
@@ -1034,7 +1058,7 @@ implements ActiveRecordResultInterface, EntityInterface
 		arguments = array(queryConditions) + findOptions;
 		exists = call_user_func_array(array(entity, 'findFirst'), arguments);
 		if exists==false {
-			foreach(conditions as field => value {
+			for field,value in conditions {
 				entity->writeAttribute(field, value);
 			}
 		}
@@ -1048,7 +1072,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	array
 	 */
-	public function distinct(params='' {
+	public function distinct(params='') 
+	{
 		this->_connect();
 		if this->_schema {
 			table = this->_schema.'.'.this->_source;
@@ -1094,7 +1119,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @static
 	 * @deprecated
 	 */
-	static public function singleSelect(sql {
+	static public function singleSelect(sql) 
+	{
 		db = \Kumbia\Db\DbPool::getConnection();
 		if substr(ltrim(sql), 0, 7)!='SELECT' {
 			sql = 'SELECT '.sql;
@@ -1113,7 +1139,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string alias
 	 * @return	mixed
 	 */
-	private function _getGroupResult(array params, selectStatement, alias {
+	private function _getGroupResult(array params, selectStatement, alias) 
+	{
 		if isset params['group'] {
 			resultResource = this->_db->query(selectStatement);
 			count = this->_db->numRows(resultResource);
@@ -1137,7 +1164,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	integer
 	 */
-	public function count(params='' {
+	public function count(params='') 
+	{
 		this->_connect();
 		if this->_schema {
 			table = this->_schema.'.'.this->_source;
@@ -1191,7 +1219,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	array
 	 */
-	public function average(params='' {
+	public function average(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -1239,7 +1268,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	double
 	 */
-	public function sum(params='' {
+	public function sum(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -1291,7 +1321,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	mixed
 	 */
-	public function maximum(params='' {
+	public function maximum(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -1339,7 +1370,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	mixed
 	 */
-	public function minimum(params='' {
+	public function minimum(params='') 
+	{
 		this->_connect();
 		numberArguments = func_num_args();
 		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
@@ -1387,7 +1419,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return		mixed
 	 * @deprecated
 	 */
-	public function countBySql(sqlQuery {
+	public function countBySql(sqlQuery) 
+	{
 		#if[compile-time]
 		CoreType::assertString(sqlQuery);
 		#endif
@@ -1405,7 +1438,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	array result
 	 * @return	ActiveRecord
 	 */
-	public function dumpResult(array result {
+	public function dumpResult(array result) 
+	{
 		this->_connect();
 		object = clone this;
 		object->_forceExists = true;
@@ -1437,7 +1471,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @param	array result
 	 */
-	public function dumpResultSelf(array result {
+	public function dumpResultSelf(array result) 
+	{
 		this->_connect();
 		this->_dumpLock = true;
 		if is_array(result)==true {
@@ -1454,7 +1489,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getMessages( {
+	public function getMessages() 
+	{
 		return this->_errorMessages;
 	}
 
