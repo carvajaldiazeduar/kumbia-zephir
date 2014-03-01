@@ -22,10 +22,19 @@
  * @version 	Id: ActiveRecordBase.php,v a434b34d7989 2011/10/26 22:23:04 andres 
  */
 
+namespace Kumbia\ActiveRecord\Base;
+
+use Kumbia\ActiveRecord\ActiveRecordResultInterface\ActiveRecordResultInterface as ActiveRecordResultInterface,
+	Kumbia\ActiveRecord\ActiveRecordResultset\ActiveRecordResultset as ActiveRecordResultset,
+	Kumbia\ActiveRecord\ActiveRecordException\ActiveRecordException as ActiveRecordException,
+	Kumbia\ActiveRecord\ActiveRecordMetaData\ActiveRecordMetaData as ActiveRecordMetaData,
+	Kumbia\Transaction\TransactionManager as TransactionManager,
+	Kumbia\EntityManager\EntityManager as EntityManager,
+	Kumbia\Utils\Utils as Utils;
 /**
  * @see ActiveRecordResultInterface
  */
-//require KEF_ABS_PATH.'Library/Kumbia/ActiveRecord/Interface.php';
+//require KEF_ABS_PATH."Library/Kumbia/ActiveRecord/Interface.php";
 
 /**
  * ActiveRecordBase
@@ -58,30 +67,28 @@
  * @access		public
  * @abstract
  */
-abstract class ActiveRecordBase extends Object
-implements ActiveRecordResultInterface, EntityInterface
-	{
+abstract class ActiveRecordBase extends Object implements ActiveRecordResultInterface, EntityInterface {
 
 	/**
 	 * Resource de conexión a la base de datos
 	 *
 	 * @var DbBase
 	 */
-	protected _db = '';
+	protected _db = "";
 
 	/**
 	 * Schema donde esta la tabla
 	 *
 	 * @var string
 	 */
-	protected _schema = '';
+	protected _schema = "";
 
 	/**
 	 * Tabla utilizada para realizar el mapeo
 	 *
 	 * @var string
 	 */
-	protected _source = '';
+	protected _source = "";
 
 	/**
 	 * Numero de resultados generados en la última consulta
@@ -118,7 +125,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @var string
 	 */
-	private _wherePk = '';
+	private _wherePk = "";
 
 	/**
 	 * Puntero del objeto en la transacción
@@ -150,7 +157,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @var array
 	 * @access protected
 	 */
-	protected _errorMessages = '';
+	protected _errorMessages = "";
 
 	/**
 	 * Indica la última operación realizada en el modelo
@@ -164,7 +171,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @var array
 	 */
-	protected _observers = array();
+	protected _observers = [];
 
 	/**
 	 * Indica si la entidad ya existe y/o obliga a comprobarlo
@@ -238,19 +245,19 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function __construct() 
+	public function __construct()  -> void
 	{
-		if this->_source=='' {
-			this->_source = \Kumbia\EntityManager::getSourceName(get_class(this));
+		if this->_source=="" {
+			let this->_source = EntityManager::getSourceName(get_class(this));
 		}
-		if method_exists(this, 'initialize' {
+		if method_exists(this, "initialize") {
 			this->initialize();
 		}
-		numberArguments = func_num_args();
+		let numberArguments = func_num_args();
 		if numberArguments>0 {
-			params = func_get_args();
+			let params = func_get_args();
 			if !isset params[0]||!typeof params == "array"[0] {
-				params = \Kumbia\Utils\Utils::getParams(params, numberArguments);
+				let params = Utils::getParams(params, numberArguments);
 			}
 			this->dumpResultSelf(params);
 		}
@@ -263,12 +270,12 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	private function _findModelName() 
 	{
-		if this->_source=='' {
-            		this->_source = \Kumbia\Utils\Utils::uncamelize(get_class(this));
-        	}
-        
-        	if this->_source=='' {
-			this->_source = get_class(this);
+		if this->_source=="" {
+        	let this->_source = Utils::uncamelize(get_class(this));
+    	}
+    
+    	if this->_source=="" {
+			let this->_source = get_class(this);
 		}
 	}
 
@@ -278,9 +285,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string source
 	 * @access	public
 	 */
-	public function setSource(source)
+	public function setSource(string source) -> void
 	{
-		this->_source = source;
+		let this->_source = source;
 	}
 
 	/**
@@ -299,15 +306,12 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @param string schema
 	 */
-	public function setSchema(schema)
+	public function setSchema(String schema) -> void
 	{
-		#if[compile-time]
-		CoreType::assertString(schema);
-		#endif
 		if schema!=this->_schema {
-			this->_dumped = false;
+			let this->_dumped = false;
 		}
-		this->_schema = schema;
+		let this->_schema = schema;
 	}
 
 	/**
@@ -316,7 +320,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string schema
 	 * @return	string
 	 */
-	public function getSchema()
+	public function getSchema() -> string
 	{
 		return this->_schema;
 	}
@@ -327,9 +331,9 @@ implements ActiveRecordResultInterface, EntityInterface
      * @access	public
      * @param	string mode
      */
-    public function setConnection(db)
+    public function setConnection(db) -> void
     {
-        this->_db = db;
+        let this->_db = db;
         if this->_debug==true {
 			this->_db->setDebug(this->_debug);
 		}
@@ -344,10 +348,10 @@ implements ActiveRecordResultInterface, EntityInterface
      *
      * @param string name
      */
-    protected function setConnectionName(name)
+    protected function setConnectionName(name) -> void
     {
-		this->_defaultConnection = false;
-		this->_connectionName = name;
+		let this->_defaultConnection = false;
+		let this->_connectionName = name;
     }
 
     /**
@@ -356,7 +360,7 @@ implements ActiveRecordResultInterface, EntityInterface
      * @access	public
      * @return	integer
      */
-    public function getCount()
+    public function getCount() -> int
     {
     	return this->_count;
     }
@@ -368,7 +372,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	boolean
 	 */
-	public function isDumped()
+	public function isDumped() -> boolean
 	{
 		return this->_dumped;
 	}
@@ -379,18 +383,18 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	boolean newConnection
 	 * @access	protected
 	 */
-	protected function _connect(newConnection=false)
+	protected function _connect(newConnection=false) -> void
 	{
-		if newConnection || this->_db==='' {
+		if newConnection || this->_db==="" {
 
-			if \Kumbia\TransactionManager::isAutomatic()==false {
+			if TransactionManager::isAutomatic()==false {
 				if this->_defaultConnection==true {
-					this->_db = \Kumbia\Db\DbPool::getConnection(newConnection);
+					//let this->_db = \Kumbia\Db\DbPool::getConnection(newConnection);
 				} else {
-					this->_db = \Kumbia\Db\DbLoader::factoryFromName(this->_connectionName);
+					//this->_db = \Kumbia\Db\DbLoader::factoryFromName(this->_connectionName);
 				}
 			} else {
-				this->_db = \Kumbia\TransactionManager::getUserTransaction()->getConnection();
+				let this->_db = TransactionManager::getUserTransaction()->getConnection();
 			}
 
 			if this->_debug==true {
@@ -424,53 +428,55 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	protected function dump()
 	{
+		var table, name, exists;
+
 		if this->_dumped===true {
 			return false;
 		}
 
-		if this->_source=='' {
+		if this->_source=="" {
 			this->_findModelName();
-			if this->_source=='' {
+			if this->_source=="" {
 				return false;
 			}
 		}
 
-		table = this->_source;
-		schema = this->_schema;
-		if !\Kumbia\ActiveRecord\ActiveRecordMetaData::existsMetaData(table, schema {
+		let table = this->_source;
+		let schema = this->_schema;
+		if !ActiveRecordMetaData::existsMetaData(table, schema) {
 
-			this->_dumped = true;
+			let this->_dumped = true;
 			if this->isView==true {
-				exists = this->_db->viewExists(table, schema);
+				let exists = this->_db->viewExists(table, schema);
 			} else {
-				exists = this->_db->tableExists(table, schema);
+				let exists = this->_db->tableExists(table, schema);
 			}
 
 			if exists==true {
 				this->_dumpInfo(table, schema);
 			} else {
-				if schema!='' {
-					throw new \Kumbia\ActiveRecord\ActiveRecordException('No existe la entidad "'.schema.'"."'.table.'" en el gestor relacional: '.get_class(this));
+				if schema!="" {
+					throw new ActiveRecordException("No existe la entidad '".schema."'.'".table."' en el gestor relacional: ".get_class(this));
 				} else {
-					throw new \Kumbia\ActiveRecord\ActiveRecordException('No existe la entidad "'.table.'" en el gestor relacional: '.get_class(this));
+					throw new ActiveRecordException("No existe la entidad '".table."' en el gestor relacional: ".get_class(this));
 				}
 				return false;
 			}
 		} else {
 			if this->isDumped()==false {
-				this->_dumped = true;
+				let this->_dumped = true;
 				this->_dumpInfo(table, schema);
 			}
 		}
 
-		this->_dumpLock = true;
-		for field in \Kumbia\ActiveRecord\ActiveRecordMetaData::getAttributes(table, schema {
+		let this->_dumpLock = true;
+		for field in ActiveRecordMetaData::getAttributes(table, schema) {
 			if !isset this->field {
-				this->field = '';
+				let this->field = "";
 			}
 		}
 
-		this->_dumpLock = false;
+		let this->_dumpLock = false;
 		return true;
 	}
 
@@ -479,9 +485,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @param boolean dumplock
 	 */
-	protected function _setDumpLock(dumplock)
+	protected function _setDumpLock(dumplock) -> boolean
 	{
-		this->_dumpLock = dumplock;
+		let this->_dumpLock = dumplock;
 	}
 
 	/**
@@ -503,26 +509,26 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string schemaName
 	 * @return	boolean
 	 */
-	protected function _dumpInfo(tableName, schemaName='')
+	protected function _dumpInfo(tableName, schemaName="")
 	{
-		this->_dumpLock = true;
-		if !\Kumbia\ActiveRecord\ActiveRecordMetaData::existsMetaData(tableName, schemaName {
+		let this->_dumpLock = true;
+		if !ActiveRecordMetaData::existsMetaData(tableName, schemaName) {
 			if this->isView==true {
-				metaData = this->_db->describeView(tableName, schemaName);
+				let metaData = this->_db->describeView(tableName, schemaName);
 			} else {
-				metaData = this->_db->describeTable(tableName, schemaName);
+				let metaData = this->_db->describeTable(tableName, schemaName);
 			}
-			\Kumbia\ActiveRecord\ActiveRecordMetaData::dumpMetaData(tableName, schemaName, metaData);
+			ActiveRecordMetaData::dumpMetaData(tableName, schemaName, metaData);
 		}
 
-		fields = \Kumbia\ActiveRecord\ActiveRecordMetaData::getAttributes(tableName, schemaName);
+		let fields = ActiveRecordMetaData::getAttributes(tableName, schemaName);
 		for field in fields {
 			if !isset this->field {
-				this->field = '';
+				let this->field = "";
 			}
 		}
 
-		this->_dumpLock = false;
+		let this->_dumpLock = false;
 		return true;
 	}
 
@@ -535,18 +541,18 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string schemaName
 	 * @return	boolean
 	 */
-	static function getDumpInfo(tableName, schemaName='')
+	static function getDumpInfo(tableName, schemaName="")
 	{
-		if !\Kumbia\ActiveRecord\ActiveRecordMetaData::existsMetaData(tableName, schemaName {
+		if !ActiveRecordMetaData::existsMetaData(tableName, schemaName) {
 			if this->isView==true {
-				metaData = this->_db->describeView(tableName, schemaName);
+				let metaData = this->_db->describeView(tableName, schemaName);
 			} else {
-				metaData = this->_db->describeTable(tableName, schemaName);
+				let metaData = this->_db->describeTable(tableName, schemaName);
 			}
-			\Kumbia\ActiveRecord\ActiveRecordMetaData::dumpMetaData(tableName, schemaName, metaData);
+			ActiveRecordMetaData::dumpMetaData(tableName, schemaName, metaData);
 		}
 
-		fields = \Kumbia\ActiveRecord\ActiveRecordMetaData::getAttributes(tableName, schemaName);
+		let fields = ActiveRecordMetaData::getAttributes(tableName, schemaName);
 		return fields;
 	}
 
@@ -558,9 +564,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	public function clear() 
 	{
 		this->_connect();
-		fields = this->_getAttributes();
-		for field in fields {
-			this->field = null;
+		var attributes = this->_getAttributes();
+		for attributes in fields {
+			let this->field = null;
 		}
 	}
 
@@ -569,9 +575,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @access public
 	 */
-	public function resetMetaData() 
+	public function resetMetaData() -> void
 	{
-		this->_dumped = false;
+		let this->_dumped = false;
 		if this->isDumped()==false {
 			this->dump();
 		}
@@ -583,9 +589,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @param	boolean debug
 	 */
-	public function setDebug(debug) 
+	public function setDebug(<boolean> debug) -> void
 	{
-		this->_debug = debug;
+		let this->_debug = debug;
 		if debug==true {
 			this->_connect();
 			this->_db->setDebug(this->_debug);
@@ -598,8 +604,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @param	boolean logger
 	 */
-	public function setLogger(logger) {
-		this->_logger = logger;
+	public function setLogger(logger) -> void
+	{
+		let this->_logger = logger;
 	}
 
 	/**
@@ -610,14 +617,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 * @return  ActiveRecordBase
 	 */
-	public function setTransaction(\Kumbia\Transaction\Transaction transaction, attach=false) 
+	public function setTransaction(Kumbia\Transaction\Transaction transaction, attach=false) 
 	{
 		if attach {
 			if transaction->isManaged()==true {
-				this->_dependencyPointer = transaction->attachDependency(this->_dependencyPointer, this);
+				let this->_dependencyPointer = transaction->attachDependency(this->_dependencyPointer, this);
 			}
 		}
-		this->_db = transaction->getConnection();
+		let this->_db = transaction->getConnection();
 		return this;
 	}
 
@@ -628,7 +635,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public function detachTransaction() 
 	{
-		this->_db = \Kumbia\Db\DbPool::getConnection();
+		//let this->_db = \Kumbia\Db\DbPool::getConnection();
 	}
 
 	/**
@@ -658,11 +665,10 @@ implements ActiveRecordResultInterface, EntityInterface
 	public function findAllBySql(sqlQuery) 
 	{
 		this->_connect();
-		resultSet = this->_db->query(sqlQuery);
-		if this->_db->numRows(resultSet)>0 {
-			return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, resultSet, sqlQuery);
+		if this->_db->numRows(this->_db->query(sqlQuery))>0 {
+			return new ActiveRecordResultset(this, resultSet, sqlQuery);
 		} else {
-			return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, false, sqlQuery);
+			return new ActiveRecordResultset(this, false, sqlQuery);
 		}
 	}
 
@@ -676,9 +682,11 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public function findBySql(sqlQuery) 
 	{
+		var row;
+
 		this->_connect();
-		this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
-		row = this->_db->fetchOne(sqlQuery);
+		//this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
+		let row = this->_db->fetchOne(sqlQuery);
 		if row!==false {
 			this->dumpResultSelf(row);
 			return this->dumpResult(row);
@@ -693,11 +701,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return	\Kumbia\ActiveRecord\ActiveRecordResultset
 	 */
-	public static function findAll(params='') 
+	public static function findAll(params="") 
 	{
-		activeModel = \Kumbia\EntityManager::getEntityInstance(get_called_class());
-		arguments = func_get_args();
-		return call_user_func_array(array(activeModel, 'find'), arguments);
+		var activeModel, arguments;
+
+		let activeModel = EntityManager::getEntityInstance(get_called_class());
+		let arguments = func_get_args();
+
+		return call_user_func_array(array(activeModel, "find"), arguments);
 	}
 
 	/**
@@ -706,11 +717,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return	ActiveRecordBase
 	 */
-	public static function findOne(params='') 
+	public static function findOne(params="") 
 	{
-		activeModel = \Kumbia\EntityManager::getEntityInstance(get_called_class());
-		arguments = func_get_args();
-		return call_user_func_array(array(activeModel, 'findFirst'), arguments);
+		var activeModel, arguments;
+
+		let activeModel = EntityManager::getEntityInstance(get_called_class());
+		let arguments = func_get_args();
+
+		return call_user_func_array(array(activeModel, "findFirst"), arguments);
 	}
 
 	/**
@@ -734,38 +748,38 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed params
 	 * @return	ActiveRecordBase
 	 */
-	public function findFirst(params='') 
+	public function findFirst(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		select = 'SELECT ';
-		if isset params['columns'] {
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		let select = "SELECT ";
+		if isset params["columns"] {
 			this->clear();
-			select.= params['columns'];
+			let select.= params["columns"];
 		} else {
-			select.= join(', ', this->_getAttributes());
+			let select.= join(", ", this->_getAttributes());
 		}
-		if this->_schema!='' {
-			select.= ' FROM '.this->_schema.'.'.this->_source;
+		if this->_schema!="") {
+			let select.= " FROM ".this->_schema.".".this->_source;
 		} else {
-			select.= ' FROM '.this->_source;
+			let select.= " FROM ".this->_source;
 		}
-		if !isset params['limit'] {
-			params['limit'] = 1;
+		if !isset params["limit"] {
+			let params["limit"] = 1;
 		}
-		select = this->convertParamsToSql(select, params);
-		resp = false;
+		let select = this->convertParamsToSql(select, params);
+		let resp = false;
 		try {
 			this->_db->setFetchmode(\Kumbia\Db\DbBase::DB_ASSOC);
-			result = this->_db->fetchOne(select);
+			let result = this->_db->fetchOne(select);
 			if result {
 				this->dumpResultSelf(result);
-				resp = this->dumpResult(result);
+				let resp = this->dumpResult(result);
 			}
 			this->_db->setFetchmode(\Kumbia\Db\DbBase::DB_BOTH);
 		}
-		catch(Exception e {
+		catch Exception,e {
 			this->exceptions(e);
 		}
 		return resp;
@@ -778,12 +792,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed params
 	 * @return	ActiveRecordBase
 	 */
-	public function findLast(params='') 
+	public function findLast(params="") 
 	{
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if !isset params['order'] {
-			params['order'] = '1 DESC';
+		var numberArguments, params;
+
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if !isset params["order"] {
+			let params["order"] = "1 DESC";
 		}
 		return this->findFirst(params);
 	}
@@ -797,69 +813,69 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	private function _createSQLSelect(array params) 
 	{
-		select = 'SELECT ';
-		if isset params['columns'] {
+		let select = "SELECT ";
+		if isset params["columns"] {
 			this->clear();
-			select.= params['columns'];
+			let select.= params["columns"];
 		} else {
-			select.= join(', ', this->_getAttributes());
+			let select.= join(", ", this->_getAttributes());
 		}
 		if this->_schema {
-			select.= ' FROM '.this->_schema.'.'.this->_source;
+			let select .= " FROM ".this->_schema.".".this->_source;
 		} else {
-			select.= ' FROM '.this->_source;
+			let select.= " FROM ".this->_source;
 		}
-		return = 'n';
-		primaryKeys = this->_getPrimaryKeyAttributes();
-		if isset params['conditions'])&&params['conditions'] {
-			select.= ' WHERE '.params['conditions'].' ';
+		let _return = "n";
+		let primaryKeys = this->_getPrimaryKeyAttributes();
+		if isset params["conditions"])&&params["conditions"] {
+			let select.= " WHERE ".params["conditions"]." ";
 		} else {
 			if !isset primaryKeys[0] {
 				if this->isView==true {
-					primaryKeys[0] = 'id';
+					let primaryKeys[0] = "id";
 				}
 			}
 			if isset params[0] {
 				if is_numeric(params[0] {
 					if isset primaryKeys[0] {
-						params['conditions'] = primaryKeys[0].' = '.this->_db->addQuotes(params[0];
-						return = '1';
+						let params["conditions"] = primaryKeys[0]." = ".this->_db->addQuotes(params[0];
+						return = "1";
 					} else {
-						throw new \Kumbia\ActiveRecord\ActiveRecordException('No se ha definido una llave primaria para este objeto');
+						throw new ActiveRecordException("No se ha definido una llave primaria para este objeto");
 					}
 				} else {
-					if params[0]==='' {
+					if params[0]==="") {
 						if isset primaryKeys[0] {
-							params['conditions'] = primaryKeys[0]." = ''";
+							let params["conditions"] = primaryKeys[0]." = "'";
 						} else {
-							throw new \Kumbia\ActiveRecord\ActiveRecordException('No se ha definido una llave primaria para este objeto');
+							throw new ActiveRecordException("No se ha definido una llave primaria para este objeto");
 						}
 					} else {
-						params['conditions'] = params[0];
+						let params["conditions"] = params[0];
 					}
-					return = 'n';
+					let _return = "n";
 				}
 			}
-			if isset params['conditions'] {
-				select.= ' WHERE '.params['conditions'];
+			if isset params["conditions"] {
+				let select.= " WHERE ".params["conditions"];
 			}
 		}
-		if isset params['group'])&&params['group'] {
-			select.= ' GROUP BY '.params['group'];
+		if isset params["group"])&&params["group"] {
+			let select.= " GROUP BY ".params["group"];
 		}
-		if isset params['order'])&&params['order'] {
-			select.= ' ORDER BY '.params['order'];
+		if isset params["order"])&&params["order"] {
+			let select.= " ORDER BY ".params["order"];
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		if isset params['for_update'])&&params['for_update']==true {
-			select = this->_db->forUpdate(select);
+		if isset params["for_update"])&&params["for_update"]==true {
+			let select = this->_db->forUpdate(select);
 		}
-		if isset params['shared_lock'])&&params['shared_lock']==true {
-			select = this->_db->sharedLock(select);
+		if isset params["shared_lock"])&&params["shared_lock"]==true {
+			let select = this->_db->sharedLock(select);
 		}
-		return array('return' => return, 'sql' => select);
+		return array("return" => _return, "sql" => select);
 	}
 
 	/**
@@ -871,24 +887,24 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	private function _createResultset(select, resultResource) 
 	{
-		if select['return']=='1' {
+		if select["return"]=="1" {
 			if this->_db->numRows(resultResource)==0 {
-				this->_count = 0;
+				let this->_count = 0;
 				return false;
 			} else {
 				this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
-				uniqueRow = this->_db->fetchArray(resultResource);
+				let uniqueRow = this->_db->fetchArray(resultResource);
 				this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_BOTH);
 				this->dumpResultSelf(uniqueRow);
-				this->_count = 1;
+				let this->_count = 1;
 				return this->dumpResult(uniqueRow);
 			}
 		} else {
-			this->_count = this->_db->numRows(resultResource);
+			let this->_count = this->_db->numRows(resultResource);
 			if this->_count>0 {
-				return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, resultResource, select['sql']);
+				return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, resultResource, select["sql"]);
 			} else {
-				return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, false, select['sql']);
+				return new \Kumbia\ActiveRecord\ActiveRecordResultset(this, false, select["sql"]);
 			}
 		}
 	}
@@ -900,13 +916,13 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string params
 	 * @return 	ActiveRecordResulset
 	 */
-	public function find(params='') 
+	public function find(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		select = this->_createSQLSelect(params);
-		resultResource = this->_db->query(select['sql']);
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		let select = this->_createSQLSelect(params);
+		let resultResource = this->_db->query(select["sql"]);
 		return this->_createResultset(select, resultResource);
 	}
 
@@ -918,19 +934,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordResulset
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function findForUpdate(params='') 
+	public function findForUpdate(params="") 
 	{
 		this->_connect();
-		#if[compile-time]
-		if this->_db->isUnderTransaction()==false {
-			throw new \Kumbia\ActiveRecord\ActiveRecordException('No se puede hacer el findForUpdate mientras no este bajo una transacción');
-		}
-		#endif
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		params['for_update'] = true;
-		select = this->_createSQLSelect(params);
-		resultResource = this->_db->query(select['sql']);
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		let params["for_update"] = true;
+		let select = this->_createSQLSelect(params);
+		let resultResource = this->_db->query(select["sql"]);
 		return this->_createResultset(select, resultResource);
 	}
 
@@ -942,19 +953,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordResulset
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function findWithSharedLock(params='') 
+	public function findWithSharedLock(params="") 
 	{
 		this->_connect();
-		#if[compile-time]
-		if this->_db->isUnderTransaction()==false {
-			throw new \Kumbia\ActiveRecord\ActiveRecordException('No se puede hacer el findWithSharedLock mientras no este bajo una transacción');
-		}
-		#endif
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		params['shared_lock'] = true;
-		select = this->_createSQLSelect(params);
-		resultResource = this->_db->query(select['sql']);
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		let params["shared_lock"] = true;
+		let select = this->_createSQLSelect(params);
+		let resultResource = this->_db->query(select["sql"]);
 		return this->_createResultset(select, resultResource);
 	}
 
@@ -966,55 +972,55 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	string
 	 */
-	public function convertParamsToSql(select, params='') 
+	public function convertParamsToSql(select, params="") 
 	{
 		if typeof params == "array" {
-			if isset params['conditions'])&&params['conditions'] {
-				select.= ' WHERE '.params["conditions"].' ';
+			if isset params["conditions"])&&params["conditions"] {
+				let select.= " WHERE ".params["conditions"]." ";
 			} else {
-				primaryKeys = this->_getPrimaryKeyAttributes();
+				let primaryKeys = this->_getPrimaryKeyAttributes();
 				if !isset primaryKeys[0] && isset this->id || this->isView {
-					primaryKeys[0] = 'id';
+					let primaryKeys[0] = "id";
 				}
 				if isset params[0] {
 					if is_numeric(params[0] {
-						params['conditions'] = primaryKeys[0].' = '.this->_db->addQuotes(params[0];
+						let params["conditions"] = primaryKeys[0]." = ".this->_db->addQuotes(params[0];
 					} else {
-						if params[0]=='' {
-							params['conditions'] = primaryKeys[0].' = \'\'';
+						if params[0]=="") {
+							let params["conditions"] = primaryKeys[0]." = \"\"";
 						} else {
-							params['conditions'] = params[0];
+							let params["conditions"] = params[0];
 						}
 					}
 				}
-				if isset params['conditions'] {
-					select.= ' WHERE '.params['conditions'];
+				if isset params["conditions"] {
+					let select.= " WHERE ".params["conditions"];
 				}
 			}
-			if isset params['order'] && params['order'] {
-				select.=' ORDER BY '.params['order'];
+			if isset params["order"] && params["order"] {
+				let select.=" ORDER BY ".params["order"];
 			} else {
-				select.=' ORDER BY 1';
+				let select.=" ORDER BY 1";
 			}
-			if isset params['limit'])&&params['limit'] {
-				select = this->_limit(select, params['limit']);
+			if isset params["limit"])&&params["limit"] {
+				let select = this->_limit(select, params["limit"]);
 			}
-			if isset params['for_update'] {
-				if params['for_update']==true {
-					select = this->_db->forUpdate(select);
+			if isset params["for_update"] {
+				if params["for_update"]==true {
+					let select = this->_db->forUpdate(select);
 				}
 			}
-			if isset params['shared_lock'] {
-				if params['shared_lock']==true {
-					select = this->_db->sharedLock(select);
+			if isset params["shared_lock"] {
+				if params["shared_lock"]==true {
+					let select = this->_db->sharedLock(select);
 				}
 			}
 		} else {
 			if strlen(params)>0 {
 				if is_numeric(params {
-					select.= 'WHERE '.primaryKeys[0].' = \''.params.'\'';
+					let select.= "WHERE ".primaryKeys[0]." = \"".params."\"";
 				} else {
-					select.= 'WHERE '.params;
+					let select.= "WHERE ".params;
 				}
 			}
 		}
@@ -1043,20 +1049,20 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	ActiveRecordBase
 	 * @static
 	 */
-	static public function getInstance(entityName, array conditions, array findOptions=array()) 
+	static public function getInstance(entityName, array conditions, array findOptions=[]) 
 	{
-		criteria = array();
+		let criteria = [];
 		for field,value in conditions {
 			if is_integer(value)||is_double(value {
-				criteria[] = field.' = '.value;
+				let criteria[] = field." = ".value;
 			} else {
-				criteria[] = field.' = '.value;
+				let criteria[] = field." = ".value;
 			}
 		}
-		queryConditions = join(' AND ', criteria);
-		entity = \Kumbia\EntityManager::getEntityInstance(entityName);
-		arguments = array(queryConditions) + findOptions;
-		exists = call_user_func_array(array(entity, 'findFirst'), arguments);
+		let queryConditions = join(" AND ", criteria);
+		let entity = EntityManager::getEntityInstance(entityName);
+		let arguments = array(queryConditions) + findOptions;
+		let exists = call_user_func_array(array(entity, "findFirst"), arguments);
 		if exists==false {
 			for field,value in conditions {
 				entity->writeAttribute(field, value);
@@ -1072,39 +1078,39 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	array
 	 */
-	public function distinct(params='') 
+	public function distinct(params="") 
 	{
 		this->_connect();
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if !isset params['column'] {
-			params['column'] = params['0'];
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if !isset params["column"] {
+			let params["column"] = params["0"];
 		} else {
-			if !params['column'] {
-				params['column'] = params['0'];
+			if !params["column"] {
+				let params["column"] = params["0"];
 			}
 		}
-		select = 'SELECT DISTINCT '.params['column'].' FROM '.table;
-		if isset params['conditions'])&&params['conditions'] {
-			select.=' WHERE '.params["conditions"];
+		let select = "SELECT DISTINCT ".params["column"]." FROM ".table;
+		if isset params["conditions"])&&params["conditions"] {
+			let select.=" WHERE ".params["conditions"];
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params["order"].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		} else {
-			select.=' ORDER BY 1 ';
+			let select.=" ORDER BY 1 ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		results = array();
+		let results = [];
 		this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_NUM);
-		foreach(this->_db->fetchAll(select) as result {
-			results[] = result[0];
+		for result in this->_db->fetchAll(select) {
+			let results[] = result[0];
 		}
 		this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
 		return results;
@@ -1121,12 +1127,12 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	static public function singleSelect(sql) 
 	{
-		db = \Kumbia\Db\DbPool::getConnection();
-		if substr(ltrim(sql), 0, 7)!='SELECT' {
-			sql = 'SELECT '.sql;
+		//let db = \Kumbia\Db\DbPool::getConnection();
+		if substr(ltrim(sql), 0, 7)!="SELECT" {
+			let sql = "SELECT ".sql;
 		}
 		db->setFetchMode(\Kumbia\Db\DbBase::DB_NUM);
-		num = db->fetchOne(sql);
+		let num = db->fetchOne(sql);
 		db->setFetchMode(\Kumbia\Db\DbBase::DB_ASSOC);
 		return num[0];
 	}
@@ -1141,18 +1147,18 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	private function _getGroupResult(array params, selectStatement, alias) 
 	{
-		if isset params['group'] {
-			resultResource = this->_db->query(selectStatement);
-			count = this->_db->numRows(resultResource);
+		if isset params["group"] {
+			let resultResource = this->_db->query(selectStatement);
+			let count = this->_db->numRows(resultResource);
 			if count>0 {
-				rowObject = new ActiveRecordRow();
+				let rowObject = new ActiveRecordRow();
 				rowObject->setConnection(this->_db);
-				return new \Kumbia\ActiveRecord\ActiveRecordResultset(rowObject, resultResource, selectStatement);
+				return new ActiveRecordResultset(rowObject, resultResource, selectStatement);
 			} else {
-				return new \Kumbia\ActiveRecord\ActiveRecordResultset(new stdClass(), false, selectStatement);
+				return new ActiveRecordResultset(new stdClass(), false, selectStatement);
 			}
 		} else {
-			num = this->_db->fetchOne(selectStatement);
+			let num = this->_db->fetchOne(selectStatement);
 			return num[alias];
 		}
 	}
@@ -1164,53 +1170,53 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	integer
 	 */
-	public function count(params='') 
+	public function count(params="") 
 	{
 		this->_connect();
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['distinct'])&&params['distinct'] {
-			select = 'SELECT COUNT(DISTINCT '.params['distinct'].') AS rowcount FROM '.table.' ';
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["distinct"])&&params["distinct"] {
+			let select = "SELECT COUNT(DISTINCT ".params["distinct"].") AS rowcount FROM ".table." ";
 		} else {
-			if isset params['group'])&&params['group'] {
-				select = 'SELECT '.params['group'].',COUNT(*) AS rowcount FROM '.table.' ';
+			if isset params["group"])&&params["group"] {
+				let select = "SELECT ".params["group"].",COUNT(*) AS rowcount FROM ".table." ";
 			} else {
-				select = 'SELECT COUNT(*) AS rowcount FROM '.table.' ';
+				let select = "SELECT COUNT(*) AS rowcount FROM ".table." ";
 			}
 		}
-		if isset params['conditions'])&&params['conditions'] {
-			select.=' WHERE '.params['conditions'].' ';
+		if isset params["conditions"])&&params["conditions"] {
+			let select.=" WHERE ".params["conditions"]." ";
 		} else {
 			if isset params[0] {
 				if is_numeric(params[0] {
-					primaryKeys = this->_getPrimaryKeyAttributes();
+					let primaryKeys = this->_getPrimaryKeyAttributes();
 					if this->isView&&(!isset primaryKeys[0]||!primaryKeys[0] {
-						primaryKeys[0] = 'id';
+						let primaryKeys[0] = "id";
 					}
-					select.= ' WHERE '.primaryKeys[0].' = \''.params[0].'\'';
+					let select.= " WHERE ".primaryKeys[0]." = \"".params[0]."\"";
 				} else {
-					select.= ' WHERE '.params[0];
+					let select.= " WHERE ".params[0];
 				}
 			}
 		}
-		if isset params['group'] {
-			select.=' GROUP BY '.params['group'].' ';
+		if isset params["group"] {
+			let select.=" GROUP BY ".params["group"]." ";
 		}
-		if isset params['having'] {
-			select.=' HAVING '.params['having'].' ';
+		if isset params["having"] {
+			let select.=" HAVING ".params["having"]." ";
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params['order'].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		return this->_getGroupResult(params, select, 'rowcount');
+		return this->_getGroupResult(params, select, "rowcount");
 	}
 
 	/**
@@ -1219,46 +1225,46 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	array
 	 */
-	public function average(params='') 
+	public function average(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['column'] {
-			if !params['column'] {
-				params['column'] = params[0];
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["column"] {
+			if !params["column"] {
+				let params["column"] = params[0];
 			}
 		} else {
-			params['column'] = params[0];
+			let params["column"] = params[0];
 		}
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		if isset params['group'])&&params['group'] {
-			select = 'SELECT '.params['group'].',AVG('.params['column'].') AS average FROM '.table.' ';
+		if isset params["group"])&&params["group"] {
+			let select = "SELECT ".params["group"].",AVG(".params["column"].") AS average FROM ".table." ";
 		} else {
-			select = 'SELECT AVG('.params['column'].') AS average FROM '.table.' ';
+			let select = "SELECT AVG(".params["column"].") AS average FROM ".table." ";
 		}
-		if isset params['conditions'])&&params['conditions'] {
-			select.= ' WHERE '.params['conditions'].' ';
+		if isset params["conditions"])&&params["conditions"] {
+			let select.= " WHERE ".params["conditions"]." ";
 		}
-		if isset params['group'] {
-			select.=' GROUP BY '.params['group'].' ';
+		if isset params["group"] {
+			let select.=" GROUP BY ".params["group"]." ";
 		}
-		if isset params['having'] {
-			select.=' HAVING '.params["having"].' ';
+		if isset params["having"] {
+			let select.=" HAVING ".params["having"]." ";
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params['order'].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		} else {
-			select.=' ORDER BY 1 ';
+			let select.=" ORDER BY 1 ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		return this->_getGroupResult(params, select, 'average');
+		return this->_getGroupResult(params, select, "average");
 	}
 
 	/**
@@ -1268,50 +1274,50 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	double
 	 */
-	public function sum(params='') 
+	public function sum(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['column'] {
-			if !params['column'] {
-				params['column'] = params[0];
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["column"] {
+			if !params["column"] {
+				let params["column"] = params[0];
 			}
 		} else {
 			if !isset params[0] {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException('No ha definido la columna a sumar');
+				throw new ActiveRecordException("No ha definido la columna a sumar");
 			} else {
-				params['column'] = params[0];
+				let params["column"] = params[0];
 			}
 		}
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		if isset params['group'])&&params['group'] {
-			select = 'SELECT '.params['group'].',SUM('.params['column'].') AS sumatory FROM '.table.' ';
+		if isset params["group"]&&params["group"] {
+			let select = "SELECT ".params["group"].",SUM(".params["column"].") AS sumatory FROM ".table." ";
 		} else {
-			select = 'SELECT SUM('.params['column'].') AS sumatory FROM '.table.' ';
+			let select = "SELECT SUM(".params["column"].") AS sumatory FROM ".table." ";
 		}
-		if isset params['conditions'])&&params['conditions'] {
-			select.= ' WHERE '.params['conditions'].' ';
+		if isset params["conditions"]&&params["conditions"] {
+			let select.= " WHERE ".params["conditions"]." ";
 		}
-		if isset params['group'] {
-			select.=' GROUP BY '.params['group'].' ';
+		if isset params["group"] {
+			let select.=" GROUP BY ".params["group"]." ";
 		}
-		if isset params['having'] {
-			select.=' HAVING '.params["having"].' ';
+		if isset params["having"] {
+			let select.=" HAVING ".params["having"]." ";
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params['order'].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		} else {
-			select.=' ORDER BY 1 ';
+			let select.=" ORDER BY 1 ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		return this->_getGroupResult(params, select, 'sumatory');
+		return this->_getGroupResult(params, select, "sumatory");
 	}
 
 	/**
@@ -1321,46 +1327,46 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	mixed
 	 */
-	public function maximum(params='') 
+	public function maximum(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['column'] {
-			if !params['column'] {
-				params['column'] = params[0];
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["column"] {
+			if !params["column"] {
+				let params["column"] = params[0];
 			}
 		} else {
-			params['column'] = params[0];
+			let params["column"] = params[0];
 		}
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		if isset params['group'])&&params['group'] {
-			select = 'SELECT '.params['group'].',MAX('.params['column'].') AS maximum FROM '.table.' ';
+		if isset params["group"])&&params["group"] {
+			let select = "SELECT ".params["group"].",MAX(".params["column"].") AS maximum FROM ".table." ";
 		} else {
-			select = 'SELECT MAX('.params['column'].') AS maximum FROM '.table.' ';
+			let select = "SELECT MAX(".params["column"].") AS maximum FROM ".table." ";
 		}
-		if isset params['conditions'])&&params['conditions'] {
-			select.= ' WHERE '.params['conditions'].' ';
+		if isset params["conditions"])&&params["conditions"] {
+			let select.= " WHERE ".params["conditions"]." ";
 		}
-		if isset params['group'] {
-			select.=' GROUP BY '.params['group'].' ';
+		if isset params["group"] {
+			let select.=" GROUP BY ".params["group"]." ";
 		}
-		if isset params['having'] {
-			select.=' HAVING '.params["having"].' ';
+		if isset params["having"] {
+			let select.=" HAVING ".params["having"]." ";
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params['order'].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		} else {
-			select.=' ORDER BY 1 ';
+			let select.=" ORDER BY 1 ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		return this->_getGroupResult(params, select, 'maximum');
+		return this->_getGroupResult(params, select, "maximum");
 	}
 
 	/**
@@ -1370,46 +1376,46 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string params
 	 * @return	mixed
 	 */
-	public function minimum(params='') 
+	public function minimum(params="") 
 	{
 		this->_connect();
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['column'] {
-			if !params['column'] {
-				params['column'] = params[0];
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["column"] {
+			if !params["column"] {
+				let params["column"] = params[0];
 			}
 		} else {
-			params['column'] = params[0];
+			let params["column"] = params[0];
 		}
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		if isset params['group'])&&params['group'] {
-			select = 'SELECT '.params['group'].',MIN('.params['column'].') AS minimum FROM '.table.' ' ;
+		if isset params["group"])&&params["group"] {
+			let select = "SELECT ".params["group"].",MIN(".params["column"].") AS minimum FROM ".table." " ;
 		} else {
-			select = 'SELECT MIN('.params['column'].') AS minimum FROM '.table.' ' ;
+			let select = "SELECT MIN(".params["column"].") AS minimum FROM ".table." " ;
 		}
-		if isset params['conditions'])&&params['conditions'] {
-			select.= ' WHERE '.params['conditions'].' ';
+		if isset params["conditions"])&&params["conditions"] {
+			let select.= " WHERE ".params["conditions"]." ";
 		}
-		if isset params['group'] {
-			select.=' GROUP BY '.params['group'].' ';
+		if isset params["group"] {
+			let select.=" GROUP BY ".params["group"]." ";
 		}
-		if isset params['having'] {
-			select.=' HAVING '.params["having"].' ';
+		if isset params["having"] {
+			let select.=" HAVING ".params["having"]." ";
 		}
-		if isset params['order'])&&params['order'] {
-			select.=' ORDER BY '.params['order'].' ';
+		if isset params["order"])&&params["order"] {
+			let select.=" ORDER BY ".params["order"]." ";
 		} else {
-			select.=' ORDER BY 1 ';
+			let select.=" ORDER BY 1 ";
 		}
-		if isset params['limit'])&&params['limit'] {
-			select = this->_limit(select, params['limit']);
+		if isset params["limit"])&&params["limit"] {
+			let select = this->_limit(select, params["limit"]);
 		}
-		return this->_getGroupResult(params, select, 'minimum');
+		return this->_getGroupResult(params, select, "minimum");
 	}
 
 	/**
@@ -1421,12 +1427,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public function countBySql(sqlQuery) 
 	{
-		#if[compile-time]
-		CoreType::assertString(sqlQuery);
-		#endif
 		this->_connect();
 		this->_db->setFetchMode(\Kumbia\Db\DbBase::DB_NUM);
-		num = this->_db->fetchOne(sqlQuery);
+		let num = this->_db->fetchOne(sqlQuery);
 		return (int) num[0];
 	}
 
@@ -1441,26 +1444,16 @@ implements ActiveRecordResultInterface, EntityInterface
 	public function dumpResult(array result) 
 	{
 		this->_connect();
-		object = clone this;
-		object->_forceExists = true;
-		/**
-		 * Consulta si la clase es padre de otra y crea el tipo de dato correcto
-		 */
-		/*if isset result['type'] {
-			if in_array(result['type'], this->_parentOf {
-				if class_exists(result['type'] {
-					obj = new result['type'];
-					unset(result['type']);
-				}
-			}
-		}*/
-		this->_dumpLock = true;
-		if is_array(result)==true {
-			foreach(result as key => value {
-				object->key = value;
+		let object = clone this;
+		let object->_forceExists = true;
+		
+		let this->_dumpLock = true;
+		if typeof result == "array" {
+			for key,value in result {
+				let object->key = value;
 			}
 		}
-		this->_dumpLock = false;
+		let this->_dumpLock = false;
 		return object;
 	}
 
@@ -1474,10 +1467,10 @@ implements ActiveRecordResultInterface, EntityInterface
 	public function dumpResultSelf(array result) 
 	{
 		this->_connect();
-		this->_dumpLock = true;
-		if is_array(result)==true {
-			foreach(result as key => value {
-				this->key = value;
+		let this->_dumpLock = true;
+		if typeof result == "array" {
+			for key,value in result {
+				let this->key = value;
 			}
 		}
 		this->_dumpLock = false;
@@ -1501,17 +1494,14 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string message
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function appendMessage(message {
-		if is_object(message {
-			#if[compile-time]
-			if get_class(message)!='ActiveRecordMessage' {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("Formato de Mensaje inválido '".get_class(message)."'");
-			}
-			#endif
+	public function appendMessage(message) 
+	{
+		if typeof message == "object" {
+			
 		} else {
-			throw new \Kumbia\ActiveRecord\ActiveRecordException("Formato de Mensaje inválido '".gettype(message)."'");
+			throw new ActiveRecordException("Formato de Mensaje inválido "".gettype(message)."'");
 		}
-		this->_errorMessages[] = message;
+		let this->_errorMessages[] = message;
 	}
 
 	/**
@@ -1519,11 +1509,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @param boolean dynamicUpdate
 	 */
-	protected function setDynamicUpdate(dynamicUpdate {
-		#if[compile-time]
-		CoreType::assertBool(dynamicUpdate);
-		#endif
-		self::_dynamicUpdate = dynamicUpdate;
+	protected function setDynamicUpdate(dynamicUpdate)
+	{
+		let self::_dynamicUpdate = dynamicUpdate;
 	}
 
 	/**
@@ -1531,11 +1519,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @param boolean dynamicInsert
 	 */
-	protected function setDynamicInsert(dynamicInsert {
-		#if[compile-time]
-		CoreType::assertBool(dynamicInsert);
-		#endif
-		self::_dynamicInsert = dynamicInsert;
+	protected function setDynamicInsert(dynamicInsert) 
+	{
+		let self::_dynamicInsert = dynamicInsert;
 	}
 
 	/**
@@ -1544,8 +1530,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string attributeName
 	 * @param	array definition
 	 */
-	public function setAttributeMetadata(attributeName, definition {
-		\Kumbia\ActiveRecord\ActiveRecordMetaData::setAttributeMetadata(this->_source, this->_schema, attributeName, definition);
+	public function setAttributeMetadata(attributeName, definition) 
+	{
+		ActiveRecordMetaData::setAttributeMetadata(this->_source, this->_schema, attributeName, definition);
 	}
 
 	/**
@@ -1554,8 +1541,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	protected
 	 * @return	array
 	 */
-	protected function _getAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getAttributes(this->_source, this->_schema);
+	protected function _getAttributes() 
+	{
+		return ActiveRecordMetaData::getAttributes(this->_source, this->_schema);
 	}
 
 	/**
@@ -1564,7 +1552,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getAttributes( {
+	public function getAttributes() 
+	{
 		this->_connect();
 		return this->_getAttributes();
 	}
@@ -1575,8 +1564,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	protected
 	 * @return	array
 	 */
-	protected function _getPrimaryKeyAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getPrimaryKeys(this->_source,  this->_schema);
+	protected function _getPrimaryKeyAttributes() 
+	{
+		return ActiveRecordMetaData::getPrimaryKeys(this->_source,  this->_schema);
 	}
 
 	/**
@@ -1585,7 +1575,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getPrimaryKeyAttributes( {
+	public function getPrimaryKeyAttributes() 
+	{
 		this->_connect();
 		return this->_getPrimaryKeyAttributes();
 	}
@@ -1596,8 +1587,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	protected
 	 * @return	array
 	 */
-	protected function _getNonPrimaryKeyAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getNonPrimaryKeys(this->_source,  this->_schema);
+	protected function _getNonPrimaryKeyAttributes() 
+	{
+		return ActiveRecordMetaData::getNonPrimaryKeys(this->_source,  this->_schema);
 	}
 
 	/**
@@ -1606,7 +1598,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getNonPrimaryKeyAttributes( {
+	public function getNonPrimaryKeyAttributes() 
+	{
 		this->_connect();
 		return this->_getNonPrimaryKeyAttributes();
 	}
@@ -1617,8 +1610,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	protected
 	 * @return	array
 	 */
-	protected function _getNotNullAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getNotNull(this->_source, this->_schema);
+	protected function _getNotNullAttributes() 
+	{
+		return ActiveRecordMetaData::getNotNull(this->_source, this->_schema);
 	}
 
 	/**
@@ -1627,7 +1621,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getNotNullAttributes( {
+	public function getNotNullAttributes() 
+	{
 		this->_connect();
 		return this->_getNotNullAttributes();
 	}
@@ -1638,8 +1633,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access protected
 	 * @return array
 	 */
-	protected function _getDatesAtAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getDatesAt(this->_source, this->_schema);
+	protected function _getDatesAtAttributes() 
+	{
+		return ActiveRecordMetaData::getDatesAt(this->_source, this->_schema);
 	}
 
 	/**
@@ -1648,7 +1644,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access public
 	 * @return array
 	 */
-	public function getDataTypes( {
+	public function getDataTypes()
+	{
 		this->_connect();
 		return this->_getDataTypes();
 	}
@@ -1659,8 +1656,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access protected
 	 * @return array
 	 */
-	protected function _getDataTypes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getDataTypes(this->_source, this->_schema);
+	protected function _getDataTypes() 
+	{
+		return ActiveRecordMetaData::getDataTypes(this->_source, this->_schema);
 	}
 
 	/**
@@ -1668,7 +1666,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return array
 	 */
-	public function getDataTypesNumeric( {
+	public function getDataTypesNumeric() 
+	{
 		this->_connect();
 		return this->_getDataTypesNumeric();
 	}
@@ -1679,8 +1678,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access protected
 	 * @return array
 	 */
-	protected function _getDataTypesNumeric( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getDataTypesNumeric(this->_source, this->_schema);
+	protected function _getDataTypesNumeric() 
+	{
+		return ActiveRecordMetaData::getDataTypesNumeric(this->_source, this->_schema);
 	}
 
 	/**
@@ -1689,9 +1689,10 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access public
 	 * @return array
 	 */
-	public function getAttributesNames( {
+	public function getAttributesNames() 
+	{
 		this->_connect();
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getAttributes(this->_source, this->_schema);
+		return ActiveRecordMetaData::getAttributes(this->_source, this->_schema);
 	}
 
 	/**
@@ -1700,7 +1701,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access public
 	 * @return array
 	 */
-	public function getDatesAtAttributes( {
+	public function getDatesAtAttributes() 
+	{
 		this->_connect();
 		return this->_getDatesAtAttributes();
 	}
@@ -1711,8 +1713,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access protected
 	 * @return array
 	 */
-	protected function _getDatesInAttributes( {
-		return \Kumbia\ActiveRecord\ActiveRecordMetaData::getDatesIn(this->_source, this->_schema);
+	protected function _getDatesInAttributes() 
+	{
+		return ActiveRecordMetaData::getDatesIn(this->_source, this->_schema);
 	}
 
 	/**
@@ -1721,7 +1724,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	public
 	 * @return	array
 	 */
-	public function getDatesInAttributes( {
+	public function getDatesInAttributes() 
+	{
 		this->_connect();
 		return this->_getDatesInAttributes();
 	}
@@ -1733,10 +1737,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string attribute
 	 * @return	mixed
 	 */
-	public function readAttribute(attribute {
-		#if[compile-time]
-		CoreType::assertString(attribute);
-		#endif
+	public function readAttribute(attribute) 
+	{
 		this->_connect();
 		return this->attribute;
 	}
@@ -1748,10 +1750,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string attribute
 	 * @param	mixed value
 	 */
-	public function writeAttribute(attribute, value {
-		#if[compile-time]
-		CoreType::assertString(attribute);
-		#endif
+	public function writeAttribute(attribute, value) 
+	{
 		this->_connect();
 		this->attribute = value;
 	}
@@ -1762,13 +1762,10 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string field
 	 * @return	boolean
 	 */
-	public function hasField(field {
-		#if[compile-time]
-		CoreType::assertString(field);
-		#endif
+	public function hasField(field) 
+	{
 		this->_connect();
-		fields = this->_getAttributes();
-		return in_array(field, fields);
+		return in_array(this->_getAttributes(), fields);
 	}
 
 	/**
@@ -1777,7 +1774,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string field
 	 * @return	boolean
 	 */
-	public function isAttribute(field {
+	public function isAttribute(field) 
+	{
 		return this->hasField(field);
 	}
 
@@ -1789,52 +1787,53 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	boolean
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function create(values='' {
+	public function create(values="") 
+	{
 		this->_connect();
-		primaryKeys = this->_getPrimaryKeyAttributes();
-		if is_array(values {
-			fields = this->getAttributes();
+		let primaryKeys = this->_getPrimaryKeyAttributes();
+		if typeof values == "array" {
+			let fields = this->getAttributes();
 			if isset values[0]&&is_array(values[0] {
-				foreach(values as value {
+				for value in values {
 					for field in fields {
-						this->field = '';
+						let this->field = "";
 					}
-					foreach(value as key => r {
+					for key,r in value {
 						if isset this->key {
-							this->key = r;
+							let this->key = r;
 						} else {
-							throw new \Kumbia\ActiveRecord\ActiveRecordException('No existe el Atributo "'.key.'" en la entidad "'.get_class(this).'" al ejecutar la inserción');
+							throw new ActiveRecordException("No existe el Atributo "".key."" en la entidad "".get_class(this)."" al ejecutar la inserción");
 						}
 					}
-					if primaryKeys[0]=='id' {
-						this->id = null;
+					if primaryKeys[0]=="id" {
+						let this->id = null;
 					}
 					return this->save();
 				}
 			} else {
-				foreach(fields as f {
-					this->f = '';
+				for f in fields {
+					let this->f = "";
 				}
-				foreach(values as key => r {
+				for key,r in values {
 					if isset this->key {
-						this->key = r;
+						let this->key = r;
 					} else {
-						throw new \Kumbia\ActiveRecord\ActiveRecordException('No existe el atributo "'.key.'" en la entidad "'.this->_source.'" al ejecutar la inserción');
+						throw new ActiveRecordException("No existe el atributo "".key."" en la entidad "".this->_source."" al ejecutar la inserción");
 					}
 				}
-				if primaryKeys[0]=='id' {
-					this->id = null;
+				if primaryKeys[0]=="id" {
+					let this->id = null;
 				}
 				return this->save();
 			}
 		} else {
-			if values!=='' {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("Parámetro incompatible en acción 'create'. No se pudo crear ningún registro");
+			if values!=="") {
+				throw new ActiveRecordException("Parámetro incompatible en acción "create". No se pudo crear ningún registro");
 			} else {
 				//Detectar campo autonumérico
-				this->_forceExists = true;
-				if primaryKeys[0]=='id' {
-					this->id = null;
+				let this->_forceExists = true;
+				if primaryKeys[0]=="id" {
+					let this->id = null;
 				}
 				return this->save();
 			}
@@ -1849,61 +1848,62 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string wherePk
 	 * @return	bool
 	 */
-	private function _exists(wherePk='' {
+	private function _exists(wherePk="") 
+	{
 		if this->_forceExists===false {
 			if this->_schema {
-				table = this->_schema.'.'.this->_source;
+				let table = this->_schema.".".this->_source;
 			} else {
-				table = this->_source;
+				let table = this->_source;
 			}
-			if wherePk==='' {
-				wherePk = array();
-				primaryKeys = this->_getPrimaryKeyAttributes();
-				dataTypeNumeric = this->_getDataTypesNumeric();
+			if wherePk==="") {
+				let wherePk = [];
+				let primaryKeys = this->_getPrimaryKeyAttributes();
+				let dataTypeNumeric = this->_getDataTypesNumeric();
 				if count(primaryKeys)>0 {
-					foreach(primaryKeys as key {
-						if this->key!==null&&this->key!=='' {
+					for key in primaryKeys {
+						if this->key!==null&&this->key!=="") {
 							if isset dataTypeNumeric[key] {
-								wherePk[] = ' '.key.' = '.this->key;
+								let wherePk[] = " ".key." = ".this->key;
 							} else {
-								wherePk[] = ' '.key.' = \''.this->key.'\'';
+								let wherePk[] = " ".key." = \"".this->key."\"";
 							}
 						}
 					}
-					if count(wherePk {
-						this->_wherePk = join(' AND ', wherePk);
+					if count(wherePk) {
+						let this->_wherePk = join(" AND ", wherePk);
 					} else {
 						return 0;
 					}
-					query = 'SELECT COUNT(*) AS rowcount FROM '.table.' WHERE '.this->_wherePk;
+					let query = "SELECT COUNT(*) AS rowcount FROM ".table." WHERE ".this->_wherePk;
 				} else {
 					return 0;
 				}
 			} else {
 				if is_numeric(wherePk {
-					query = 'SELECT COUNT(*) AS rowcount FROM '.table.' WHERE id = '.wherePk;
+					let query = "SELECT COUNT(*) AS rowcount FROM ".table." WHERE id = ".wherePk;
 				} else {
-					query = 'SELECT COUNT(*) AS rowcount FROM '.table.' WHERE '.wherePk;
+					let query = "SELECT COUNT(*) AS rowcount FROM ".table." WHERE ".wherePk;
 				}
 			}
-			num = this->_db->fetchOne(query);
-			return (bool) num['rowcount'];
+			let num = this->_db->fetchOne(query);
+			return (boolean) num["rowcount"];
 		} else {
-			wherePk = array();
-			primaryKeys = this->_getPrimaryKeyAttributes();
-			dataTypeNumeric = this->_getDataTypesNumeric();
+			let wherePk = [];
+			let primaryKeys = this->_getPrimaryKeyAttributes();
+			let dataTypeNumeric = this->_getDataTypesNumeric();
 			if count(primaryKeys)>0 {
-				foreach(primaryKeys as key {
-					if this->key!==null && this->key!=='' {
+				for key in primaryKeys {
+					if this->key!==null && this->key!=="") {
 						if isset dataTypeNumeric[key] {
-							wherePk[] = ' '.key.' = '.this->key;
+							let wherePk[] = " ".key." = ".this->key;
 						} else {
-							wherePk[] = ' '.key.' = \''.this->key.'\'';
+							let wherePk[] = " ".key." = \"".this->key."\"";
 						}
 					}
 				}
-				if count(wherePk {
-					this->_wherePk = join(' AND ', wherePk);
+				if count(wherePk) {
+					let this->_wherePk = join(" AND ", wherePk);
 					return true;
 				} else {
 					return 0;
@@ -1921,7 +1921,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string wherePk
 	 * @return	bool
 	 */
-	public function exists(wherePk='' {
+	public function exists(wherePk="") 
+	{
 		this->_connect();
 		return this->_exists(wherePk);
 	}
@@ -1931,14 +1932,15 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return boolean
 	 */
-	protected function _cancelOperation( {
+	protected function _cancelOperation() 
+	{
 		if this->_operationMade==self::OP_DELETE {
-			this->_callEvent('notDeleted');
+			this->_callEvent("notDeleted");
 		} else {
-			this->_callEvent('notSaved');
+			this->_callEvent("notSaved");
 		}
-		if \Kumbia\TransactionManager::isAutomatic()==true {
-			transaction = \Kumbia\TransactionManager::getAutomaticTransaction();
+		if TransactionManager::isAutomatic()==true {
+			let transaction = TransactionManager::getAutomaticTransaction();
 			transaction->setRollbackedRecord(this);
 			transaction->rollback();
 		} else {
@@ -1952,31 +1954,32 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	boolean
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function save( {
+	public function save() 
+	{
 
 		this->_connect();
-		exists = this->_exists();
+		let exists = this->_exists();
 
 		if exists==false {
-			this->_operationMade = self::OP_CREATE;
+			let this->_operationMade = self::OP_CREATE;
 		} else {
-			this->_operationMade = self::OP_UPDATE;
+			let this->_operationMade = self::OP_UPDATE;
 		}
 
 		// Run Validation Callbacks Before
-		this->_errorMessages = array();
+		let this->_errorMessages = [];
 		if self::_disableEvents==false {
-			if this->_callEvent('beforeValidation')===false {
+			if this->_callEvent("beforeValidation")===false {
 				this->_cancelOperation();
 				return false;
 			}
 			if !exists {
-				if this->_callEvent('beforeValidationOnCreate')===false {
+				if this->_callEvent("beforeValidationOnCreate")===false {
 					this->_cancelOperation();
 					return false;
 				}
 			} else {
-				if this->_callEvent('beforeValidationOnUpdate')===false {
+				if this->_callEvent("beforeValidationOnUpdate")===false {
 					this->_cancelOperation();
 					return false;
 				}
@@ -1984,61 +1987,57 @@ implements ActiveRecordResultInterface, EntityInterface
 		}
 
 		//Generadores
-		generator = null;
-		className = get_class(this);
-		//if \Kumbia\EntityManager::hasGenerator(className {
-		//	generator = \Kumbia\EntityManager::getEntityGenerator(className);
-		//	generator->setIdentifier(this);
-		//}
-
+		let generator = null;
+		let className = get_class(this);
+		
 		//LLaves foráneas virtuales
-		if \Kumbia\EntityManager::hasForeignKeys(className {
-			foreignKeys = \Kumbia\EntityManager::getForeignKeys(className);
-			error = false;
-			foreach(foreignKeys as indexKey => keyDescription {
+		if EntityManager::hasForeignKeys(className {
+			let foreignKeys = EntityManager::getForeignKeys(className);
+			let error = false;
+			for indexKey,keyDescription in foreignKeys {
 
-				entity = \Kumbia\EntityManager::getEntityInstance(keyDescription['rt'], false);
-				field = keyDescription['fi'];
-				if this->field===null || this->field==='' {
+				let entity = EntityManager::getEntityInstance(keyDescription["rt"], false);
+				let field = keyDescription["fi"];
+				if this->field===null || this->field==="" {
 					continue;
 				}
 
-				conditions = keyDescription['rf']." = '".this->field."'";
-				if isset keyDescription['op']['conditions'] {
-					conditions.= ' AND '.keyDescription['op']['conditions'];
+				let conditions = keyDescription["rf"]." = "".this->field."'";
+				if isset keyDescription["op"]["conditions"] {
+					let conditions.= " AND ".keyDescription["op"]["conditions"];
 				}
 
 				entity->setConnection(this->getConnection());
-				rowcount = entity->count(conditions);
+				let rowcount = entity->count(conditions);
 				if rowcount==0 {
-					if isset keyDescription['op']['message'] {
-						userMessage = keyDescription['op']['message'];
+					if isset keyDescription["op"]["message"] {
+						let userMessage = keyDescription["op"]["message"];
 					} else {
-						userMessage = 'El valor de "'.keyDescription['fi'].'" no existe en la tabla referencia';
+						let userMessage = "El valor de "".keyDescription["fi"]."" no existe en la tabla referencia";
 					}
-					message = new ActiveRecordMessage(userMessage, keyDescription['fi'], 'ConstraintViolation');
+					let message = new ActiveRecordMessage(userMessage, keyDescription["fi"], "ConstraintViolation");
 					this->appendMessage(message);
-					error = true;
+					let error = true;
 					break;
 				}
 			}
 			if error==true {
-				this->_callEvent('onValidationFails');
+				this->_callEvent("onValidationFails");
 				this->_cancelOperation();
 				return false;
 			}
 		}
 
-		notNull = this->_getNotNullAttributes();
-		at = this->_getDatesAtAttributes();
-		in = this->_getDatesInAttributes();
-		if is_array(notNull {
-			error = false;
-			numFields = count(notNull);
+		let notNull = this->_getNotNullAttributes();
+		let at = this->_getDatesAtAttributes();
+		let _in = this->_getDatesInAttributes();
+		if typeof notNull == "array" {
+			let error = false;
+			let numFields = count(notNull);
 			for(i=0;i<numFields;++i {
-				field = notNull[i];
-				if this->field===null || this->field==='' {
-					if !exists&&field=='id' {
+				let field = notNull[i];
+				if this->field===null || this->field==="" {
+					if !exists&&field=="id" {
 						continue;
 					}
 					if !exists {
@@ -2046,26 +2045,26 @@ implements ActiveRecordResultInterface, EntityInterface
 							continue;
 						}
 					} else {
-						if isset in[field] {
+						if isset _in[field] {
 							continue;
 						}
 					}
-					humanField = str_replace('_id', '', field);
-					message = new ActiveRecordMessage("El campo humanField no puede ser nulo ''", field, 'PresenceOf');
+					let humanField = str_replace("_id", "", field);
+					let message = new ActiveRecordMessage("El campo humanField no puede ser nulo "'", field, "PresenceOf");
 					this->appendMessage(message);
-					error = true;
+					let error = true;
 				}
 			}
 			if error==true {
-				this->_callEvent('onValidationFails');
+				this->_callEvent("onValidationFails");
 				this->_cancelOperation();
 				return false;
 			}
 		}
 
 		// Run Validation
-		if this->_callEvent('validation')===false {
-			this->_callEvent('onValidationFails');
+		if this->_callEvent("validation")===false {
+			this->_callEvent("onValidationFails");
 			this->_cancelOperation();
 			return false;
 		}
@@ -2073,33 +2072,33 @@ implements ActiveRecordResultInterface, EntityInterface
 		if self::_disableEvents==false {
 			// Run Validation Callbacks After
 			if !exists {
-				if this->_callEvent('afterValidationOnCreate')===false {
+				if this->_callEvent("afterValidationOnCreate")===false {
 					this->_cancelOperation();
 					return false;
 				}
 			} else {
-				if this->_callEvent('afterValidationOnUpdate')===false {
+				if this->_callEvent("afterValidationOnUpdate")===false {
 					this->_cancelOperation();
 					return false;
 				}
 			}
-			if this->_callEvent('afterValidation')===false {
+			if this->_callEvent("afterValidation")===false {
 				this->_cancelOperation();
 				return false;
 			}
 
 			// Run Before Callbacks
-			if this->_callEvent('beforeSave')===false {
+			if this->_callEvent("beforeSave")===false {
 				this->_cancelOperation();
 				return false;
 			}
 			if exists {
-				if this->_callEvent('beforeUpdate')===false {
+				if this->_callEvent("beforeUpdate")===false {
 					this->_cancelOperation();
 					return false;
 				}
 			} else {
-				if this->_callEvent('beforeCreate')===false {
+				if this->_callEvent("beforeCreate")===false {
 					this->_cancelOperation();
 					return false;
 				}
@@ -2107,98 +2106,98 @@ implements ActiveRecordResultInterface, EntityInterface
 		}
 
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
 
-		magicQuotesRuntime = get_magic_quotes_runtime();
-		dataType = this->_getDataTypes();
-		primaryKeys = this->_getPrimaryKeyAttributes();
-		dataTypeNumeric = this->_getDataTypesNumeric();
+		let magicQuotesRuntime = get_magic_quotes_runtime();
+		let dataType = this->_getDataTypes();
+		let primaryKeys = this->_getPrimaryKeyAttributes();
+		let dataTypeNumeric = this->_getDataTypesNumeric();
 		if exists {
 			if self::_dynamicUpdate==false {
-				fields = array();
-				values = array();
-				nonPrimary = this->_getNonPrimaryKeyAttributes();
-				foreach(nonPrimary as np {
-					if isset in[np] {
-						this->np = Date::now();
+				let fields = [];
+				let values = [];
+				let nonPrimary = this->_getNonPrimaryKeyAttributes();
+				for np in nonPrimary {
+					if isset _in[np] {
+						let this->np = Date::now();
 					}
-					fields[] = np;
+					let fields[] = np;
 					if  is_object(this->np) && (this->np instanceof DbRawValue {
-						values[] = this->np->getValue();
+						let values[] = this->np->getValue();
 					} else {
-						if this->np===''||this->np===null {
-							values[] = 'NULL';
+						if this->np===""||this->np===null {
+							let values[] = "NULL";
 						} else {
 							if !isset dataTypeNumeric[np] {
-								if dataType[np]=='date' {
-									values[] = this->_db->getDateUsingFormat(this->np);
+								if dataType[np]=="date" {
+									let values[] = this->_db->getDateUsingFormat(this->np);
 								} else {
-									values[] = '\''.addslashes(this->np).'\'';
+									let values[] = "\"".addslashes(this->np)."\"";
 								}
 							} else {
-								values[] = addslashes(this->np);
+								let values[] = addslashes(this->np);
 							}
 						}
 					}
 				}
 			} else {
-				conditions = array();
-				foreach(primaryKeys as field {
+				let conditions = [];
+				for field in primaryKeys {
 					if !isset dataTypeNumeric[field] {
-						conditions[] = field.' = \''.this->field.'\'';
+						let conditions[] = field." = \"".this->field."\"";
 					} else {
-						conditions[] = field.' = '.this->field;
+						let conditions[] = field." = ".this->field;
 					}
 				}
-				pkCondition = join(' AND ', conditions);
-				existRecord = clone this;
-				record = existRecord->findFirst(pkCondition);
-				fields = array();
-				values = array();
-				nonPrimary = this->_getNonPrimaryKeyAttributes();
-				foreach(nonPrimary as np {
-					if isset in[np] {
-						this->np = this->_db->getCurrentDate();
+				let pkCondition = join(" AND ", conditions);
+				let existRecord = clone this;
+				let record = existRecord->findFirst(pkCondition);
+				let fields = [];
+				let values = [];
+				let nonPrimary = this->_getNonPrimaryKeyAttributes();
+				for np in nonPrimary {
+					if isset _in[np] {
+						let this->np = this->_db->getCurrentDate();
 					}
-					if is_object(this->np {
+					if typeof this->np == "object" {
 						if this->np instanceof DbRawValue {
-							value = this->np->getValue();
+							let value = this->np->getValue();
 						} else {
 							if this->np instanceof Date {
-								value = (string) this->np;
+								let value = (string) this->np;
 							} else {
 								if this->np instanceof Decimal {
-									value = (string) this->np;
+									let value = (string) this->np;
 								} else {
-									throw new \Kumbia\ActiveRecord\ActiveRecordException('El objeto instancia de "'.get_class(this->field).'" en el campo "'.field.'" es muy complejo, debe realizarle un "cast" a un tipo de dato escalar antes de almacenarlo');
+									throw new ActiveRecordException("El objeto instancia de "".get_class(this->field)."" en el campo "".field."" es muy complejo, debe realizarle un "cast" a un tipo de dato escalar antes de almacenarlo");
 								}
 							}
 						}
 						if record->np!=value {
-							fields[] = np;
-							values[] = values;
+							let fields[] = np;
+							let values[] = values;
 						}
 					} else {
-						if this->np===''||this->np===null {
-							if record->np!==''&&record->np!==null {
-								fields[] = np;
-								values[] = 'NULL';
+						if this->np===""||this->np===null {
+							if record->np!==""&&record->np!==null {
+								let fields[] = np;
+								let values[] = "NULL";
 							}
 						} else {
 							if !isset dataTypeNumeric[np] {
-								if dataType[np]=='date' {
-									value = this->_db->getDateUsingFormat(this->np);
+								if dataType[np]=="date" {
+									let value = this->_db->getDateUsingFormat(this->np);
 									if record->np!=value {
-										fields[] = np;
-										values[] = value;
+										let fields[] = np;
+										let values[] = value;
 									}
 								} else {
 									if record->np!=this->np {
-										fields[] = np;
-										values[] = "'".addslashes(this->np)."'";
+										let fields[] = np;
+										let values[] = "'".addslashes(this->np)."'";
 									}
 								}
 							}
@@ -2206,59 +2205,59 @@ implements ActiveRecordResultInterface, EntityInterface
 					}
 				}
 			}
-			success = this->_db->update(table, fields, values, this->_wherePk);
+			let success = this->_db->update(table, fields, values, this->_wherePk);
 		} else {
-			fields = array();
-			values = array();
-			attributes = this->getAttributes();
-			foreach(attributes as field {
-				if field!='id' {
+			let fields = [];
+			let values = [];
+			let attributes = this->getAttributes();
+			foreach field in attributes {
+				if field!="id" {
 					if isset at[field] {
 						if this->field==null||this->field==="" {
-							this->field = this->_db->getCurrentDate();
+							let this->field = this->_db->getCurrentDate();
 						}
 					} else {
-						if isset in[field] {
-							this->field = new DbRawValue('NULL');
+						if isset _in[field] {
+							let this->field = new DbRawValue("NULL");
 						}
 					}
-					fields[] = field;
-					if is_object(this->field {
+					let fields[] = field;
+					if typeof this->field == "object" {
 						if this->field instanceof DbRawValue {
-							values[] = this->field->getValue();
+							let values[] = this->field->getValue();
 						} else {
 							if this->field instanceof Date {
-								values[] =  (string) this->field;
+								let values[] =  (string) this->field;
 							} else {
 								if this->field instanceof Decimal {
-									values[] = (string) this->field;
+									let values[] = (string) this->field;
 								} else {
-									throw new \Kumbia\ActiveRecord\ActiveRecordException('El objeto instancia de "'.get_class(this->field).'" en el campo "'.field.'" es muy complejo, debe realizarle un "cast" a un tipo de dato escalar antes de almacenarlo');
+									throw new ActiveRecordException("El objeto instancia de "".get_class(this->field)."" en el campo "".field."" es muy complejo, debe realizarle un "cast" a un tipo de dato escalar antes de almacenarlo");
 								}
 							}
 						}
 					} else {
-						if isset dataTypeNumeric[field]) || this->field=='NULL' {
-							if this->field==='' || this->field===null {
-								values[] = 'NULL';
+						if isset dataTypeNumeric[field] || this->field=="NULL" {
+							if this->field==="" || this->field===null {
+								let values[] = "NULL";
 							} else {
-								values[] = addslashes(this->field);
+								let values[] = addslashes(this->field);
 							}
 						} else {
-							if dataType[field]=='date' {
-								if this->field===null || this->field==='' {
-									values[] = 'NULL';
+							if dataType[field]=="date" {
+								if this->field===null || this->field==="" {
+									let values[] = "NULL";
 								} else {
-									values[] = this->_db->getDateUsingFormat(addslashes(this->field));
+									let values[] = this->_db->getDateUsingFormat(addslashes(this->field));
 								}
 							} else {
-								if this->field===null || this->field==='' {
-									values[] = 'NULL';
+								if this->field===null || this->field==="" {
+									let values[] = "NULL";
 								} else {
 									if magicQuotesRuntime==true {
-										values[] = "'".this->field."'";
+										let values[] = "'".this->field."'";
 									} else {
-									    values[] = "'".addslashes(this->field)."'";
+									    let values[] = "'".addslashes(this->field)."'";
 									}
 								}
 							}
@@ -2266,33 +2265,33 @@ implements ActiveRecordResultInterface, EntityInterface
 					}
 				}
 			}
-			sequenceName = '';
+			let sequenceName = "";
 			if generator===null {
 				if count(primaryKeys)==1 {
 					// Hay que buscar la columna identidad aqui!
-					if !isset this->id) ||! this->id {
-						/*if method_exists(this, 'sequenceName' {
-							sequenceName = this->sequenceName();
+					if !isset this->id ||! this->id {
+						/*if method_exists(this, "sequenceName" {
+							let sequenceName = this->sequenceName();
 						}
 						identityValue = this->_db->getRequiredSequence(this->_source, primaryKeys[0], sequenceName);
 						if identityValue!==false {
-							fields[] = 'id';
-							values[] = identityValue;
+							let fields[] = "id";
+							let values[] = identityValue;
 						}*/
 					} else {
 						if isset this->id {
-							fields[] = 'id';
-							values[] = this->id;
+							let fields[] = "id";
+							let values[] = this->id;
 						}
 					}
 				}
 			} else {
 				if isset this->id {
-					fields[] = 'id';
-					values[] = this->id;
+					let fields[] = "id";
+					let values[] = this->id;
 				}
 			}
-			success = this->_db->insert(table, values, fields);
+			let success = this->_db->insert(table, values, fields);
 		}
 		if this->_db->isUnderTransaction()==false {
 			if this->_db->getHaveAutoCommit()==true {
@@ -2301,17 +2300,17 @@ implements ActiveRecordResultInterface, EntityInterface
 		}
 		if success {
 			if exists==true {
-				this->_callEvent('afterUpdate');
+				this->_callEvent("afterUpdate");
 			} else {
 				if generator===null {
 					if count(primaryKeys)==1 {
 						if isset dataTypeNumeric[primaryKeys[0]] {
-						    lastId = this->_db->lastInsertId(table, primaryKeys[0], sequenceName);
+						    let lastId = this->_db->lastInsertId(table, primaryKeys[0], sequenceName);
 						    if lastId>0 {
 								if self::_refreshPersistance==true {
 									this->findFirst(lastId);
 								} else {
-									this->{primaryKeys[0]} = lastId;
+									let this->{primaryKeys[0]} = lastId;
 								}
 						    }
 						}
@@ -2320,12 +2319,12 @@ implements ActiveRecordResultInterface, EntityInterface
 					//Actualiza el consecutivo para algunos generadores
 					//generator->updateConsecutive(this);
 				}
-				this->_callEvent('afterCreate');
+				this->_callEvent("afterCreate");
 			}
-			this->_callEvent('afterSave');
+			this->_callEvent("afterSave");
 			return success;
 		} else {
-			this->_callEvent('notSave');
+			this->_callEvent("notSave");
 			this->_cancelOperation();
 			return false;
 		}
@@ -2337,11 +2336,12 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param string eventName
 	 * @param callback callback
 	 */
-	public function observe(eventName, callback {
+	public function observe(eventName, callback) 
+	{
 		if !isset this->_observers[eventName] {
-			this->_observers[eventName] = array();
+			let this->_observers[eventName] = [];
 		}
-		this->_observers[eventName][] = callback;
+		let this->_observers[eventName][] = callback;
 	}
 
 	/**
@@ -2349,7 +2349,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return boolean
 	 */
-	public function getOperationMade( {
+	public function getOperationMade() 
+	{
 		return this->_operationMade;
 	}
 
@@ -2358,7 +2359,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return boolean
 	 */
-	public function operationWasInsert( {
+	public function operationWasInsert() 
+	{
 		return this->_operationMade == self::OP_CREATE ? true : false;
 	}
 
@@ -2367,7 +2369,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return boolean
 	 */
-	public function operationWasUpdate( {
+	public function operationWasUpdate() 
+	{
 		return this->_operationMade == self::OP_UPDATE ? true : false;
 	}
 
@@ -2378,8 +2381,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string column
 	 * @param	array options
 	 */
-	public function setIdGenerator(adapter, column, options=array( {
-		\Kumbia\EntityManager::setEntityGenerator(get_class(this), adapter, column, options);
+	public function setIdGenerator(adapter, column, options=array() 
+	{
+		EntityManager::setEntityGenerator(get_class(this), adapter, column, options);
 	}
 
 	/**
@@ -2390,8 +2394,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string value
 	 * @return	\Kumbia\ActiveRecord\ActiveRecordResultset
 	 */
-	public function findAllBy(field, value {
-		return this->find(array('conditions' => field." = 'value'"));
+	public function findAllBy(field, value) 
+	{
+		return this->find(array("conditions" => field." = "value""));
 	}
 
 	/**
@@ -2401,29 +2406,30 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	boolean
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function update(values='' {
+	public function update(values="") 
+	{
 		this->_connect();
-		numberArguments = func_num_args();
-		values = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if is_array(values {
-			foreach(values as key => value {
+		let numberArguments = func_num_args();
+		let values = Utils::getParams(func_get_args(), numberArguments);
+		if typeof values == "array" {
+			for key,value in values {
 				if isset this->key {
-					this->key = value;
+					let this->key = value;
 				} else {
-					throw new \Kumbia\ActiveRecord\ActiveRecordException('No existe el atributo "'.key.'" en la entidad "'.this->_source.'" al ejecutar la inserción');
+					throw new ActiveRecordException("No existe el atributo "".key."" en la entidad "".this->_source."" al ejecutar la inserción");
 				}
 			}
 			if this->_exists()==true {
 				return this->save();
 			} else {
-				this->appendMessage('', 'No se puede actualizar porque el registro no existe');
+				this->appendMessage("", "No se puede actualizar porque el registro no existe");
 				return false;
 			}
 		} else {
 			if this->_exists()==true {
 				return this->save();
 			} else {
-				this->appendMessage('', 'No se puede actualizar porque el registro no existe');
+				this->appendMessage("", "No se puede actualizar porque el registro no existe");
 				return false;
 			}
 		}
@@ -2436,95 +2442,96 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed params
 	 * @return	boolean
 	 */
-	public function delete(params='' {
+	public function delete(params="") 
+	{
 
 		this->_connect();
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
 
-		this->_operationMade = self::OP_DELETE;
+		let this->_operationMade = self::OP_DELETE;
 
-		conditions = '';
+		let conditions = "";
 		if typeof params == "array" {
-			numberArguments = func_num_args();
-			params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-			if isset params['conditions'] {
-				conditions = params['conditions'];
+			let numberArguments = func_num_args();
+			let params = Utils::getParams(func_get_args(), numberArguments);
+			if isset params["conditions"] {
+				let conditions = params["conditions"];
 			}
 		} else {
-			primaryKeys = this->_getPrimaryKeyAttributes();
+			let primaryKeys = this->_getPrimaryKeyAttributes();
 			if is_numeric(params {
 				if count(primaryKeys)==1 {
-					conditions = primaryKeys[0]." = '".params."'";
+					let conditions = primaryKeys[0]." = '".params."'";
 				} else {
-					throw new \Kumbia\ActiveRecord\ActiveRecordException('Número de parámetros insuficientes para realizar el borrado');
+					throw new ActiveRecordException("Número de parámetros insuficientes para realizar el borrado");
 				}
 			} else{
 				if params {
-					conditions = params;
+					let conditions = params;
 				} else {
 					if count(primaryKeys)==1 {
-						primaryKeyValue = this->readAttribute(primaryKeys[0];
-						conditions = primaryKeys[0]." = '".primaryKeyValue."'";
+						let primaryKeyValue = this->readAttribute(primaryKeys[0];
+						let conditions = primaryKeys[0]." = '".primaryKeyValue."'";
 					} else {
-						conditions = array();
-						foreach(primaryKeys as primaryKey {
-							primaryKeyValue = this->readAttribute(primaryKey);
-							conditions[] = primaryKey." = '".primaryKeyValue."'";
+						let conditions = [];
+						for primaryKey in primaryKeys {
+							let primaryKeyValue = this->readAttribute(primaryKey);
+							let conditions[] = primaryKey." = '".primaryKeyValue."'";
 						}
-						conditions = join(' AND ', conditions);
+						let conditions = join(" AND ", conditions);
 					}
 				}
 			}
 		}
 
 		//LLaves foráneas virtuales (reversa)
-		className = get_class(this);
-		hasManyDefinitions = \Kumbia\EntityManager::getAllHasManyDefinition(className);
+		let className = get_class(this);
+		let hasManyDefinitions = EntityManager::getAllHasManyDefinition(className);
 		if hasManyDefinitions {
-			error = false;
-			foreach(hasManyDefinitions as entityRelation => definition {
-				if \Kumbia\EntityManager::hasForeignKeys(entityRelation {
-					foreignKey = \Kumbia\EntityManager::getForeignKey(entityRelation, className);
+			let error = false;
+			for entityRelation,definition in hasManyDefinitions {
+				if EntityManager::hasForeignKeys(entityRelation {
+					let foreignKey = EntityManager::getForeignKey(entityRelation, className);
 					if foreignKey!==false {
-						localValue = this->readAttribute(foreignKey['rf']);
-						referencedEntity = \Kumbia\EntityManager::getEntityInstance(entityRelation);
+						let localValue = this->readAttribute(foreignKey["rf"]);
+						let referencedEntity = EntityManager::getEntityInstance(entityRelation);
 						referencedEntity->setConnection(this->getConnection());
-						referenceConditions = "{foreignKey['fi']} = 'localValue'";
-						if isset foreignKey['conditions'] {
-							referenceConditions.= " AND ".foreignKey['conditions'];
+						let referenceConditions = "".foreignKey["fi"]." = '".localValue."'";
+						if isset foreignKey["conditions"] {
+							let referenceConditions.= " AND ".foreignKey["conditions"];
 						}
-						rowCount = referencedEntity->count(referenceConditions);
+						let rowCount = referencedEntity->count(referenceConditions);
 						if rowCount>0 {
-							if isset keyDescription['op']['deleteMessage'] {
-								userMessage = keyDescription['op']['deleteMessage'];
+							if isset keyDescription["op"]["deleteMessage"] {
+								let userMessage = keyDescription["op"]["deleteMessage"];
 							} else {
-								userMessage = 'El registro esta referenciado en '.entityRelation;
+								let userMessage = "El registro esta referenciado en ".entityRelation;
 							}
-							message = new ActiveRecordMessage(userMessage, foreignKey['fi'], 'ConstraintViolation');
+							let message = new ActiveRecordMessage(userMessage, foreignKey["fi"], "ConstraintViolation");
 							this->appendMessage(message);
-							error = true;
+							let error = true;
 							break;
 						}
 					}
 				}
 			}
 			if error==true {
-				this->_callEvent('onValidationFails');
+				this->_callEvent("onValidationFails");
 				this->_cancelOperation();
 				return false;
 			}
 		}
 
-		if this->_callEvent('beforeDelete')===false {
+		if this->_callEvent("beforeDelete")===false {
 			return false;
 		}
-		success = this->_db->delete(table, conditions);
+		let success = this->_db->delete(table, conditions);
 		if success==true {
-			this->_callEvent('afterDelete');
+			this->_callEvent("afterDelete");
 		}
 		return success;
 	}
@@ -2532,40 +2539,41 @@ implements ActiveRecordResultInterface, EntityInterface
 	/**
 	 * Actualiza todos los atributos de la entidad
 	 *
-	 * Clientes::updateAll("estado='A', fecha='2005-02-02'", "id>100");
-	 * Clientes::updateAll("estado='A', fecha='2005-02-02'", "id>100", "limit: 10");
+	 * Clientes::updateAll("estado="A", fecha="2005-02-02"", "id>100");
+	 * Clientes::updateAll("estado="A", fecha="2005-02-02"", "id>100", "limit: 10");
 	 *
 	 * @access	public
 	 * @param	string values
 	 * @return	boolean
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function updateAll(values {
+	public function updateAll(values) 
+	{
 		this->_connect();
-		params = array();
+		let params = [];
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if !isset params['conditions'])||!params['conditions'] {
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if !isset params["conditions"])||!params["conditions"] {
 			if isset params[1] {
-				params['conditions'] = params[1];
+				let params["conditions"] = params[1];
 			} else {
-				params['conditions'] = '';
+				let params["conditions"] = "";
 			}
 		}
-		if params['conditions'] {
-			params['conditions'] = ' WHERE '.params['conditions'];
+		if params["conditions"] {
+			let params["conditions"] = " WHERE ".params["conditions"];
 		}
 		if !isset params[0] {
-			throw new \Kumbia\ActiveRecord\ActiveRecordException('Debe indicar los valores a actualizar');
+			throw new ActiveRecordException("Debe indicar los valores a actualizar");
 		}
-		sql = 'UPDATE '.table.' SET '.params[0].' '.params['conditions'];
-		if isset params['limit'])&&params['limit'] {
-			sql = this->_limit(sql, params["limit"]);
+		let sql = "UPDATE ".table." SET ".params[0]." ".params["conditions"];
+		if isset params["limit"])&&params["limit"] {
+			let sql = this->_limit(sql, params["limit"]);
 		}
 		return this->_db->query(sql);
 	}
@@ -2577,20 +2585,18 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string conditions
 	 * @return	ActiveRecordBase
 	 */
-	public function deleteAll(conditions='' {
-		#if[compile-time]
-		CoreType::assertString(conditions);
-		#endif
+	public function deleteAll(conditions="") 
+	{
 		this->_connect();
 		if this->_schema {
-			table = this->_schema.'.'.this->_source;
+			let table = this->_schema.".".this->_source;
 		} else {
-			table = this->_source;
+			let table = this->_source;
 		}
-		numberArguments = func_num_args();
-		params = \Kumbia\Utils\Utils::getParams(func_get_args(), numberArguments);
-		if isset params['limit'] {
-			conditions = this->_limit(params[0], params['limit']);
+		let numberArguments = func_num_args();
+		let params = Utils::getParams(func_get_args(), numberArguments);
+		if isset params["limit"] {
+			let conditions = this->_limit(params[0], params["limit"]);
 		}
 		if isset params[0] {
 			this->_db->delete(table, params[0];
@@ -2607,23 +2613,24 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access public
 	 * @return string
 	 */
-	public function inspect( {
-		inspect = array();
-		fields = this->_getAttributes();
+	public function inspect() 
+	{
+		inspect = [];
+		let fields = this->_getAttributes();
 		for field in fields {
-			if !is_array(field {
-				if is_object(this->field {
-					if method_exists(this->field, '__toString' {
-						inspect[] = field.'='.this->field;
+			if typeof field != "array" {
+				if typeof this->field == "object" {
+					if method_exists(this->field, "__toString") {
+						let inspect[] = field."=".this->field;
 					} else {
-						inspect[] = field.'=<'.get_class(this->field).'>';
+						let inspect[] = field."=<".get_class(this->field).">";
 					}
 				} else {
-					inspect[] = field.'='.this->field;
+					let inspect[] = field."=".this->field;
 				}
 			}
 		}
-		return '<'.get_class(this).'> '.join(', ', inspect);
+		return "<".get_class(this)."> ".join(", ", inspect);
 	}
 
 	/**
@@ -2632,22 +2639,23 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string eventName
 	 * @return	boolean
 	 */
-	private function _callEvent(eventName {
+	private function _callEvent(eventName) 
+	{
 		if self::_disableEvents==false {
 			if isset this->_observers[eventName] {
-				foreach(this->_observers[eventName] as observer {
+				for observer in this->_observers[eventName] {
 					if observer(this)===false {
 						return false;
 					}
 				}
 			}
-			if method_exists(this, eventName {
+			if method_exists(this, eventName) {
 				if this->{eventName}()===false {
 					return false;
 				}
 			} else {
 				if isset this->{eventName} {
-					method = this->{eventName};
+					let method = this->{eventName};
 					if this->method()===false {
 						return false;
 					}
@@ -2664,20 +2672,21 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	string field
 	 * @param 	array options
 	 */
-	private function _executeValidator(className, field, options {
-		if is_array(field)==false {
-			validator = new className(this, field, this->field, options);
+	private function _executeValidator(className, field, options) 
+	{
+		if typeof field != "array" {
+			let validator = new className(this, field, this->field, options);
 		} else {
-			values = array();
-			foreach(field as singleField {
-				values[] = this->singleField;
+			let values = [];
+			for singleField in field {
+				let values[] = this->singleField;
 			}
-			validator = new className(this, field, values, options);
+			let validator = new className(this, field, values, options);
 		}
 		validator->checkOptions();
 		if validator->validate()===false {
-			foreach(validator->getMessages() as message {
-				this->_errorMessages[] = message;
+			for message in validator->getMessages() {
+				let this->_errorMessages[] = message;
 			}
 		}
 	}
@@ -2690,26 +2699,27 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	array options
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	protected function validate(validatorClass, options {
+	protected function validate(validatorClass, options) 
+	{
 		if typeof options == "array" {
-			if !isset options['field'] {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("No ha indicado el campo a validar para 'className'");
+			if !isset options["field"] {
+				throw new ActiveRecordException("No ha indicado el campo a validar para "className"");
 			} else {
-				field = options['field'];
+				let field = options["field"];
 			}
 		} else {
-			if options=='' {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("No ha indicado el campo a validar para 'className'");
+			if options=="" {
+				throw new ActiveRecordException("No ha indicado el campo a validar para "className"");
 			} else {
-				field = options;
+				let field = options;
 			}
 		}
-		if !is_array(field {
+		if typeof field != "array" {
 			this->_executeValidator(className, field, options);
 		} else {
-			foreach(field as singleField {
+			for singleField in field {
 				if !isset this->singleField {
-					throw new \Kumbia\ActiveRecord\ActiveRecordException("No se puede validar el campo 'singleField' por que no esta presente en la entidad");
+					throw new ActiveRecordException("No se puede validar el campo "singleField" por que no esta presente en la entidad");
 				}
 			}
 			this->_executeValidator(className, field, options);
@@ -2721,7 +2731,8 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @return boolean
 	 */
-	public function validationHasFailed( {
+	public function validationHasFailed() 
+	{
 		if count(this->_errorMessages)>0 {
 			return true;
 		} else {
@@ -2735,8 +2746,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string field
 	 * @return	boolean
 	 */
-	public function isANumericType(field {
-		dataTypeNumeric = this->_getDataTypeNumeric();
+	public function isANumericType(field) 
+	{
+		let dataTypeNumeric = this->_getDataTypeNumeric();
 		if isset dataTypeNumeric[field] {
 			return true;
 		} else {
@@ -2750,9 +2762,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @access	protected
 	 * @param	string relation
 	 */
-	protected function hasOne(fields='', referenceTable='', referencedFields='')
+	protected function hasOne(fields="", referenceTable="", referencedFields="")
 	{
-		\Kumbia\EntityManager::addHasOne(get_class(this), fields, referenceTable, referencedFields);
+		EntityManager::addHasOne(get_class(this), fields, referenceTable, referencedFields);
 	}
 
 	/**
@@ -2763,9 +2775,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string referencedFields
 	 * @param	string relationName
 	 */
-	protected function belongsTo(fields='', referenceTable='', referencedFields='', relationName='')
+	protected function belongsTo(fields="", referenceTable="", referencedFields="", relationName="")
 	{
-		\Kumbia\EntityManager::addBelongsTo(get_class(this), fields, referenceTable, referencedFields, relationName);
+		EntityManager::addBelongsTo(get_class(this), fields, referenceTable, referencedFields, relationName);
 	}
 
 	/**
@@ -2775,9 +2787,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	string referenceTable
 	 * @param	string referencedFields
 	 */
-	protected function hasMany(fields='', referenceTable='', referencedFields='')
+	protected function hasMany(fields="", referenceTable="", referencedFields="")
 	{
-		\Kumbia\EntityManager::addHasMany(get_class(this), fields, referenceTable, referencedFields);
+		EntityManager::addHasMany(get_class(this), fields, referenceTable, referencedFields);
 	}
 
 	/**
@@ -2785,7 +2797,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 *
 	 * @param string relation
 	 */
-	protected function hasAndBelongsToMany(relation {
+	protected function hasAndBelongsToMany(relation) {
 		/*relations =  func_get_args();
 		foreach(relations as relation {
 			if !in_array(relation, this->_hasAndBelongsToMany {
@@ -2802,9 +2814,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed referencedFields
 	 * @param	array options
 	 */
-	protected function addForeignKey(fields, referencedTable='', referencedFields='', options=array())
+	protected function addForeignKey(fields, referencedTable="", referencedFields="", options=[])
 	{
-		\Kumbia\EntityManager::addForeignKey(get_class(this), fields, referencedTable, referencedFields, options);
+		EntityManager::addForeignKey(get_class(this), fields, referencedTable, referencedFields, options);
 	}
 
 	/**
@@ -2814,7 +2826,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public function setTrasient(attribute)
 	{
-		\Kumbia\EntityManager::addTrasientAttribute(get_class(this), attribute);
+		EntityManager::addTrasientAttribute(get_class(this), attribute);
 	}
 
 	/**
@@ -2824,7 +2836,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public function setForceExists(forceExists)
 	{
-		this->_forceExists = forceExists;
+		let this->_forceExists = forceExists;
 	}
 
 	/**
@@ -2863,7 +2875,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public static function disableEvents(disableEvents)
 	{
-		self::_disableEvents = disableEvents;
+		let self::_disableEvents = disableEvents;
 	}
 
 	/**
@@ -2873,7 +2885,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 */
 	public static function refreshPersistance(refreshPersistance)
 	{
-		self::_refreshPersistance = refreshPersistance;
+		let self::_refreshPersistance = refreshPersistance;
 	}
 
 	/**
@@ -2909,16 +2921,16 @@ implements ActiveRecordResultInterface, EntityInterface
 		this->_connect();
 		if this->_dumpLock==false {
 			if !isset this->property {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("Propiedad indefinida 'property' leida de el modelo 'this->_source'");
+				throw new ActiveRecordException("Propiedad indefinida "property" leida de el modelo "this->_source"");
 			} else {
 				try {
-					reflectorProperty = new ReflectionProperty(get_class(this), property);
+					let reflectorProperty = new ReflectionProperty(get_class(this), property);
 					if reflectorProperty->isPublic()==false {
-						throw new \Kumbia\ActiveRecord\ActiveRecordException("Propiedad protegida ó privada 'property' leida de el modelo 'this->_source' ");
+						throw new ActiveRecordException("Propiedad protegida ó privada "property" leida de el modelo "this->_source" ");
 					}
 				}
-				catch(Exception e {
-					if e instanceof \Kumbia\ActiveRecord\ActiveRecordException {
+				catch Exception,e {
+					if e instanceof ActiveRecordException {
 						throw e;
 					}
 				}
@@ -2940,10 +2952,10 @@ implements ActiveRecordResultInterface, EntityInterface
 		this->_connect();
 		if this->_dumpLock==false {
 			if isset this->property)==false {
-				throw new \Kumbia\ActiveRecord\ActiveRecordException("La propiedad 'property' no existe en la entidad '".get_class(this)."'");
+				throw new ActiveRecordException("La propiedad '".property."' no existe en la entidad '".get_class(this)."'");
 			}
 		}
-		this->property = value;
+		let this->property = value;
 	}
 
 	/**
@@ -2954,7 +2966,7 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	mixed
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public function __call(method, arguments = array())
+	public function __call(method, arguments = [])
 	{
 		return this->_handleInaccessibleCall(this, method, arguments);
 	}
@@ -2967,9 +2979,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @return	mixed
 	 * @throws	\Kumbia\ActiveRecord\ActiveRecordException
 	 */
-	public static function __callStatic(method, arguments=array())
+	public static function __callStatic(method, arguments=[])
 	{
-		object = \Kumbia\EntityManager::getEntityInstance(get_called_class());
+		let object = EntityManager::getEntityInstance(get_called_class());
 		return object->_handleInaccessibleCall(object, method, arguments);
 	}
 
@@ -2981,97 +2993,97 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	array arguments
 	 * @return	\Kumbia\ActiveRecord\ActiveRecordResultset
 	 */
-	protected function _handleInaccessibleCall(object, method, arguments=array())
+	protected function _handleInaccessibleCall(object, method, arguments=[])
 	{
 		object->_connect();
-		entityName = get_class(object);
+		let entityName = get_class(object);
 
-		if substr(method, 0, 3)=='get' {
-			requestedRelation = ucfirst(substr(method, 3));
-			if \Kumbia\EntityManager::existsBelongsTo(entityName, requestedRelation)==true {
-				entityArguments = array('findFirst', entityName, requestedRelation, object);
-				return call_user_func_array(array('EntityManager', 'getBelongsToRecords'), array_merge(entityArguments, arguments));
+		if substr(method, 0, 3)=="get" {
+			let requestedRelation = ucfirst(substr(method, 3));
+			if EntityManager::existsBelongsTo(entityName, requestedRelation)==true {
+				let entityArguments = array("findFirst", entityName, requestedRelation, object);
+				return call_user_func_array(array("EntityManager", "getBelongsToRecords"), array_merge(entityArguments, arguments));
 			}
-			if \Kumbia\EntityManager::existsHasMany(entityName, requestedRelation)==true {
-				entityArguments = array('find', entityName, requestedRelation, object);
-				return call_user_func_array(array('EntityManager', 'getHasManyRecords'), array_merge(entityArguments, arguments));
+			if EntityManager::existsHasMany(entityName, requestedRelation)==true {
+				let entityArguments = array("find", entityName, requestedRelation, object);
+				return call_user_func_array(array("EntityManager", "getHasManyRecords"), array_merge(entityArguments, arguments));
 			}
-			if \Kumbia\EntityManager::existsHasOne(entityName, requestedRelation)==true {
-				entityArguments = array('findFirst', entityName, requestedRelation, object);
-				return call_user_func_array(array('EntityManager', 'getHasOneRecords'), array_merge(entityArguments, arguments));
+			if EntityManager::existsHasOne(entityName, requestedRelation)==true {
+				let entityArguments = array("findFirst", entityName, requestedRelation, object);
+				return call_user_func_array(array("EntityManager", "getHasOneRecords"), array_merge(entityArguments, arguments));
 			}
 		}
 
-		if substr(method, 0, 5)=='count' {
-			requestedRelation = ucfirst(substr(method, 5));
-			if \Kumbia\EntityManager::existsBelongsTo(entityName, requestedRelation)==true {
-				entityArguments = array('count', entityName, requestedRelation, object);
-				return call_user_func_array(array('EntityManager', 'getBelongsToRecords'), array_merge(entityArguments, arguments));
+		if substr(method, 0, 5)=="count" {
+			let requestedRelation = ucfirst(substr(method, 5));
+			if EntityManager::existsBelongsTo(entityName, requestedRelation)==true {
+				let entityArguments = array("count", entityName, requestedRelation, object);
+				return call_user_func_array(array("EntityManager", "getBelongsToRecords"), array_merge(entityArguments, arguments));
 			}
-			if \Kumbia\EntityManager::existsHasMany(entityName, requestedRelation)==true {
-				entityArguments = array('count', entityName, requestedRelation, object);
-				return call_user_func_array(array('EntityManager', 'getHasManyRecords'), array_merge(entityArguments, arguments));
+			if EntityManager::existsHasMany(entityName, requestedRelation)==true {
+				let entityArguments = array("count", entityName, requestedRelation, object);
+				return call_user_func_array(array("EntityManager", "getHasManyRecords"), array_merge(entityArguments, arguments));
 			}
-			if \Kumbia\EntityManager::existsHasOne(entityName, requestedRelation)==true {
-				return \Kumbia\EntityManager::getHasOneRecords('count', entityName, requestedRelation, object);
+			if EntityManager::existsHasOne(entityName, requestedRelation)==true {
+				return EntityManager::getHasOneRecords("count", entityName, requestedRelation, object);
 			}
 		}
 
-		if substr(method, 0, 6)=='findBy' {
-			field = \Kumbia\Utils\Utils::uncamelize(\Kumbia\Utils\Utils::lcfirst(substr(method, 6)));
+		if substr(method, 0, 6)=="findBy" {
+			let field = Utils::uncamelize(\Utils::lcfirst(substr(method, 6)));
 			if isset arguments[0] {
-				argument = array('conditions' => field.' = '.object->_db->addQuotes(arguments[0]);
+				let argument = array("conditions" => field." = ".object->_db->addQuotes(arguments[0]);
 				unset(arguments[0];
 			} else {
-				argument = array();
+				let argument = [];
 			}
-			return call_user_func_array(array(object, 'findFirst'), array_merge(argument, arguments));
+			return call_user_func_array(array(object, "findFirst"), array_merge(argument, arguments));
 		}
 
-		if substr(method, 0, 7)=='countBy' {
-			field = \Kumbia\Utils\Utils::uncamelize(\Kumbia\Utils\Utils::lcfirst(substr(method, 7)));
+		if substr(method, 0, 7)=="countBy" {
+			let field = Utils::uncamelize(\Utils::lcfirst(substr(method, 7)));
 			if isset arguments[0] {
-				argument = array(field.' = '.object->_db->addQuotes(arguments[0]);
+				let argument = array(field." = ".object->_db->addQuotes(arguments[0]);
 				unset(arguments[0];
 			} else {
-				argument = array();
+				let argument = [];
 			}
-			return call_user_func_array(array(object, 'count'), array_merge(argument, arguments));
+			return call_user_func_array(array(object, "count"), array_merge(argument, arguments));
 		}
 
-		if substr(method, 0, 9)=='findAllBy' {
-			field = \Kumbia\Utils\Utils::uncamelize(\Kumbia\Utils\Utils::lcfirst(substr(method, 9)));
+		if substr(method, 0, 9)=="findAllBy" {
+			let field = Utils::uncamelize(\Utils::lcfirst(substr(method, 9)));
 			if isset arguments[0] {
-				argument = array(field.' = '.object->_db->addQuotes(arguments[0]);
+				let argument = array(field." = ".object->_db->addQuotes(arguments[0]);
 				unset(arguments[0];
 			} else {
-				argument = array();
+				let argument = [];
 			}
-			return call_user_func_array(array(object, 'find'), array_merge(argument, arguments));
+			return call_user_func_array(array(object, "find"), array_merge(argument, arguments));
 		}
 
-		if substr(method, 0, 3)=='new' {
-			requestedRelation = ucfirst(substr(method, 3));
-			if \Kumbia\EntityManager::existsHasMany(entityName, requestedRelation)==true {
-				definition = \Kumbia\EntityManager::getHasManyDefinition(entityName, requestedRelation);
-				entity = \Kumbia\EntityManager::getEntityInstance(requestedRelation, true);
-				if !is_array(definition['fields'] {
-					entity->writeAttribute(definition['fields'], this->readAttribute(definition['referencedFields']));
+		if substr(method, 0, 3)=="new" {
+			let requestedRelation = ucfirst(substr(method, 3));
+			if EntityManager::existsHasMany(entityName, requestedRelation)==true {
+				let definition = EntityManager::getHasManyDefinition(entityName, requestedRelation);
+				let entity = EntityManager::getEntityInstance(requestedRelation, true);
+				if typeof definition["fields"] != "array" {
+					entity->writeAttribute(definition["fields"], this->readAttribute(definition["referencedFields"]));
 				}
 				return entity;
 			}
-			if \Kumbia\EntityManager::existsHasOne(entityName, requestedRelation)==true {
-				entity = \Kumbia\EntityManager::getEntityInstance(entityName);
+			if EntityManager::existsHasOne(entityName, requestedRelation)==true {
+				let entity = EntityManager::getEntityInstance(entityName);
 			}
 		}
 
-		if substr(method, 0, 8)=='sanizite' {
-			fieldName = \Kumbia\Utils\Utils::uncamelize(\Kumbia\Utils\Utils::lcfirst(substr(method, 8)));
+		if substr(method, 0, 8)=="sanizite" {
+			let fieldName = Utils::uncamelize(\Utils::lcfirst(substr(method, 8)));
 			array_unshift(arguments, get_class(object));
-			return call_user_func_array(array('ActiveRecordUtils', 'saniziteByDataType'), arguments);
+			return call_user_func_array(array("ActiveRecordUtils", "saniziteByDataType"), arguments);
 		}
 
-		throw new \Kumbia\ActiveRecord\ActiveRecordException('No se encontró el método "'.method.'" en el modelo "'.get_class(object).'"');
+		throw new ActiveRecordException("No se encontró el método '".method."' en el modelo '".get_class(object)."'");
 	}
 
 	/**
@@ -3080,10 +3092,11 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param 	array entities
 	 * @return	ActiveRecordJoin
 	 */
-	public static function join(entities {
-		entities = func_get_args();
+	public static function join(entities) 
+	{
+		let entities = func_get_args();
 		array_unshift(entities, get_called_class());
-		return new ActiveRecordJoin(array('entities' => entities));
+		return new ActiveRecordJoin(array("entities" => entities));
 	}
 
 	/**
@@ -3093,23 +3106,24 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	array except
 	 * @return	ActiveRecordBase
 	 */
-	public static function factory(data, except=array( {
+	public static function factory(data, except=array()) 
+	{
 		if is_array(data {
-			entityName = get_called_class();
-			entity = \Kumbia\EntityManager::get(entityName, true);
-			dataTypes = entity->getDataTypes();
-			foreach(data as key => value {
-				key = \Kumbia\Utils\Utils::uncamelize(key);
-				if !in_array(key, except {
+			let entityName = get_called_class();
+			let entity = EntityManager::get(entityName, true);
+			let dataTypes = entity->getDataTypes();
+			for key,value in data {
+				let key = Utils::uncamelize(key);
+				if !in_array(key, except) {
 					if isset dataTypes[key] {
-						value = ActiveRecord\Kumbia\Utils\Utils::saniziteByDataType(entityName, key, value);
+						let value = Utils::saniziteByDataType(entityName, key, value);
 						entity->writeAttribute(key, value);
 					}
 				}
 			}
 			return entity;
 		} else {
-			throw new \Kumbia\ActiveRecord\ActiveRecordException('Factory requiere un array como parámetro');
+			throw new ActiveRecordException("Factory requiere un array como parámetro");
 		}
 	}
 
@@ -3120,8 +3134,9 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * @param	mixed value
 	 * @return	string
 	 */
-	public static function sanizite(fieldName, value {
-		return ActiveRecord\Kumbia\Utils\Utils::saniziteByDataType(get_called_class(), fieldName, value);
+	public static function sanizite(fieldName, value) 
+	{
+		return Utils::saniziteByDataType(get_called_class(), fieldName, value);
 	}
 
 	/**
@@ -3129,10 +3144,11 @@ implements ActiveRecordResultInterface, EntityInterface
 	 * pero desconociendo si existe o no en la persistencia
 	 *
 	 */
-	public function __clone( {
-		this->_forceExists = false;
-		this->_wherePk = false;
-		this->_dumped = false;
+	public function __clone() 
+	{
+		let this->_forceExists = false;
+		let this->_wherePk = false;
+		let this->_dumped = false;
 	}
 
 }

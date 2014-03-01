@@ -18,6 +18,8 @@
  * @version 	Id: ActiveRecordException.zep 122 2010-02-11 19:09:18Z gutierrezandresfelipe 
  */
 
+namespace Kumbia\ActiveRecord;
+
 /**
  * ActiveRecordException
  *
@@ -30,7 +32,7 @@
  * @license		New BSD License
  * @access		public
  */
-class ActiveRecordException extends CoreException
+class ActiveRecordException extends Exception
 {
 
 	/**

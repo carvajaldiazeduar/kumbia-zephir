@@ -18,6 +18,8 @@
  * @version 	Id: Interface.php 5 2009-04-24 01:48:48Z gutierrezandresfelipe 
  */
 
+namespace Kumbia\ActiveRecord;
+
 /**
  * ActiveRecordResultInterface
  *
